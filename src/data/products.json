@@ -1,0 +1,305 @@
+[
+  {
+    "id": "xsign-flex-tee",
+    "slug": "xsign-flex-tee",
+    "title": "X-SIGN FLEX TEE",
+    "subtitle": "100% Heavy Cotton • Glitter Gold, Silver, Glow-in-the-Dark & Reflective DTF",
+    "category": "t-shirts",
+    "garmentType": "tshirt",
+    "priceGHS": 299,
+    "priceUSD": 23,
+    "priceGBP": 18,
+    "priceEUR": 21,
+    "isNew": true,
+    "isFeatured": true,
+    "isSoldOut": false,
+    "stockCount": 85,
+    "dropName": "X-SIGN DROP 01",
+    "images": [
+      "/campaign/models/IMG_4338.jpg",
+      "/products/shirts/IMG_4266.PNG",
+      "/campaign/models/IMG_4330.jpg",
+      "/products/shirts/IMG_4251.PNG",
+      "/campaign/models/IMG_4368.jpg",
+      "/products/shirts/IMG_4260.PNG",
+      "/campaign/models/IMG_4472.jpg",
+      "/products/shirts/IMG_4259.PNG",
+      "/campaign/models/IMG_4394.jpg"
+    ],
+    "colors": [
+      {
+        "name": "Onyx Black / Glow in Dark & Reflective",
+        "hex": "#111113",
+        "modelHex": "#18181b",
+        "images": [
+          "/campaign/models/IMG_4338.jpg",
+          "/products/shirts/IMG_4266.PNG",
+          "/products/shirts/IMG_4252.PNG",
+          "/campaign/models/IMG_4323.jpg"
+        ]
+      },
+      {
+        "name": "Chalk White / Glitter Silver & DTF",
+        "hex": "#f4f4f4",
+        "modelHex": "#f0ede6",
+        "images": [
+          "/campaign/models/IMG_4330.jpg",
+          "/products/shirts/IMG_4251.PNG",
+          "/products/shirts/IMG_4250.PNG",
+          "/campaign/models/IMG_4332.jpg"
+        ]
+      },
+      {
+        "name": "Onyx Black / Sovereign Glitter Gold",
+        "hex": "#1a1813",
+        "modelHex": "#141416",
+        "images": [
+          "/campaign/models/IMG_4368.jpg",
+          "/products/shirts/IMG_4260.PNG",
+          "/products/shirts/IMG_4258.PNG",
+          "/campaign/models/IMG_4366.jpg"
+        ]
+      },
+      {
+        "name": "Chalk White / Celestial Glitter Gold",
+        "hex": "#ece8e1",
+        "modelHex": "#f4f1ea",
+        "images": [
+          "/campaign/models/IMG_4472.jpg",
+          "/products/shirts/IMG_4259.PNG",
+          "/campaign/models/IMG_4475.jpg"
+        ]
+      },
+      {
+        "name": "Onyx Black / Starlight Diamond",
+        "hex": "#0d0e12",
+        "modelHex": "#121318",
+        "images": [
+          "/campaign/models/IMG_4394.jpg",
+          "/products/shirts/IMG_4267.PNG",
+          "/products/shirts/IMG_4263.PNG",
+          "/campaign/models/IMG_4390.jpg"
+        ]
+      }
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "description": "Crafted with heart, worn with purpose. Engineered from custom 320 GSM heavyweight 100% combed cotton, the X-SIGN Flex Tee combines architectural drop-shoulder streetwear tailoring with hand-finished metallic glitter gold, silver foil, and light-reactive reflective accents.",
+    "fabricDetails": {
+      "composition": "Heavy fabric of 100% Cotton",
+      "weight": "320 GSM compact streetwear jersey",
+      "finish": "Glitter Gold, Glitter Silver, Glow in Dark, Reflective and Fine Finished DTF",
+      "origin": "Atelier Crafted in Accra"
+    },
+    "features": [
+      "X-SIGN FLEX TEE: Crafted with heart, worn with purpose.",
+      "Fine materials: Glitter Gold & Glitter Silver metallic shimmer accents",
+      "Glow in the Dark & Reflective light-activated elements",
+      "Fine Finished Direct-to-Film (DTF) precision detailing",
+      "Heavy fabric constructed from 100% premium cotton"
+    ],
+    "careInstructions": [
+      "Machine wash cold inside out on gentle cycle",
+      "Hang dry in shade to preserve artwork vibrancy",
+      "Do not iron directly over printed graphics"
+    ],
+    "model3DConfig": {
+      "garmentType": "tshirt",
+      "defaultColor": "#1a1a1a",
+      "roughness": 0.9,
+      "metalness": 0.05,
+      "fabricPattern": "smooth",
+      "scale": [
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  {
+    "id": "xsign-beanie-classic",
+    "slug": "xsign-ribbed-beanie-classic",
+    "title": "X-SIGN RIBBED BEANIE (Embroidered Crest)",
+    "subtitle": "7-Gauge Chunky Rib Knit • Raised 3D Embroidered Crest",
+    "category": "accessories",
+    "garmentType": "accessory",
+    "priceGHS": 149,
+    "priceUSD": 12,
+    "priceGBP": 9,
+    "priceEUR": 11,
+    "isNew": true,
+    "isFeatured": true,
+    "isSoldOut": false,
+    "stockCount": 50,
+    "dropName": "",
+    "images": [
+      "/products/caps/IMG_3375.PNG",
+      "/products/caps/IMG_4228.PNG",
+      "/products/caps/xsign-white-beanie-street-look.jpg",
+      "/products/caps/IMG_4216.PNG",
+      "/products/caps/IMG_4220.PNG"
+    ],
+    "colors": [
+      {
+        "name": "Pitch Black / White Crest",
+        "hex": "#0f0f10",
+        "modelHex": "#171718",
+        "images": [
+          "/products/caps/IMG_3375.PNG",
+          "/products/caps/IMG_4225.PNG",
+          "/products/caps/IMG_4237.PNG"
+        ]
+      },
+      {
+        "name": "Chalk White / Obsidian Crest",
+        "hex": "#f0f0f2",
+        "modelHex": "#f0ede6",
+        "images": [
+          "/products/caps/IMG_4228.PNG",
+          "/products/caps/xsign-white-beanie-street-look.jpg",
+          "/products/caps/IMG_4231.PNG",
+          "/products/caps/IMG_4226.PNG",
+          "/products/caps/IMG_4227.PNG",
+          "/products/caps/IMG_4246.PNG"
+        ]
+      },
+      {
+        "name": "Heather Grey / White Crest",
+        "hex": "#9e9e9e",
+        "modelHex": "#888888",
+        "images": [
+          "/products/caps/IMG_4216.PNG",
+          "/products/caps/IMG_4217.PNG",
+          "/products/caps/IMG_4219.PNG",
+          "/products/caps/IMG_4199.PNG"
+        ]
+      },
+      {
+        "name": "Mocha Camel / White Crest",
+        "hex": "#b5927b",
+        "modelHex": "#ba9a83",
+        "images": [
+          "/products/caps/IMG_4220.PNG",
+          "/products/caps/IMG_4221.PNG",
+          "/products/caps/IMG_4223.PNG",
+          "/products/caps/IMG_4240.PNG"
+        ]
+      }
+    ],
+    "sizes": [
+      "ONE SIZE"
+    ],
+    "description": "Chunky 7-gauge double-cuffed fisherman beanie knitted from ultra-soft non-itch thermal acrylic blend. Features the iconic high-density white or obsidian X-SIGN oval crest embroidery.",
+    "fabricDetails": {
+      "composition": "100% Soft-Spun Thermal Acrylic Knit",
+      "weight": "Chunky 7-gauge double-fold",
+      "finish": "High-density multi-pass 3D embroidery",
+      "origin": "Atelier Crafted in Accra"
+    },
+    "features": [
+      "High-contrast dense embroidery oval crest",
+      "Double-ply folding cuff for adjustable depth",
+      "Retains snug shape without sagging",
+      "Ultra soft next-to-skin touch"
+    ],
+    "careInstructions": [
+      "Hand wash cold with mild detergent",
+      "Dry flat on a clean surface"
+    ],
+    "model3DConfig": {
+      "garmentType": "accessory",
+      "defaultColor": "#171718",
+      "roughness": 0.9,
+      "metalness": 0.05,
+      "fabricPattern": "heavy-terry",
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    }
+  },
+  {
+    "id": "xsign-beanie-glitter-gold",
+    "slug": "xsign-ribbed-beanie-glitter-gold",
+    "title": "X-SIGN RIBBED BEANIE (Glitter Gold Crest)",
+    "subtitle": "7-Gauge Chunky Rib Knit • Radiant Gold Shimmer Emblem",
+    "category": "accessories",
+    "garmentType": "accessory",
+    "priceGHS": 149,
+    "priceUSD": 12,
+    "priceGBP": 9,
+    "priceEUR": 11,
+    "isNew": true,
+    "isFeatured": true,
+    "isSoldOut": false,
+    "stockCount": 35,
+    "dropName": "",
+    "images": [
+      "/products/caps/IMG_4195.PNG",
+      "/products/caps/IMG_4202.PNG",
+      "/products/caps/IMG_4197.PNG",
+      "/products/caps/IMG_4203.PNG",
+      "/products/caps/IMG_4242.PNG",
+      "/products/caps/IMG_4244.PNG"
+    ],
+    "colors": [
+      {
+        "name": "Pitch Black / Gold Shimmer",
+        "hex": "#171718",
+        "modelHex": "#171718",
+        "images": [
+          "/products/caps/IMG_4195.PNG",
+          "/products/caps/IMG_4242.PNG",
+          "/products/caps/IMG_4209.PNG"
+        ]
+      },
+      {
+        "name": "Chalk White / Gold Shimmer",
+        "hex": "#f0f0f2",
+        "modelHex": "#f0ede6",
+        "images": [
+          "/products/caps/IMG_4202.PNG",
+          "/products/caps/IMG_4244.PNG"
+        ]
+      }
+    ],
+    "sizes": [
+      "ONE SIZE"
+    ],
+    "description": "Dark and light luxury headwear woven with ribbed thermal stitch and finished with the signature X-SIGN emblem in radiant gold shimmer embroidery.",
+    "fabricDetails": {
+      "composition": "100% Soft-Spun Thermal Knit",
+      "weight": "Chunky 7-gauge double-fold",
+      "finish": "Lustrous metallic gold thread embroidery",
+      "origin": "Atelier Crafted in Accra"
+    },
+    "features": [
+      "Glimmering gold embroidery oval emblem",
+      "Deep fold cuff for flexible styling",
+      "Ultra comfortable non-irritating fit",
+      "Deluxe atelier construction"
+    ],
+    "careInstructions": [
+      "Hand wash cold gently",
+      "Dry flat in shade"
+    ],
+    "model3DConfig": {
+      "garmentType": "accessory",
+      "defaultColor": "#171718",
+      "roughness": 0.85,
+      "metalness": 0.25,
+      "fabricPattern": "heavy-terry",
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    }
+  }
+]

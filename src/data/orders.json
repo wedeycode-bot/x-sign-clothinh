@@ -1,0 +1,77 @@
+[
+  {
+    "orderNumber": "ORD-103480",
+    "customerName": "king george ",
+    "customerEmail": "kinggeorge65679@gmail.com",
+    "customerPhone": "0544585503",
+    "deliveryCity": "Accra",
+    "deliveryAddress": "Okyeame Lartey strt",
+    "notes": "",
+    "items": [
+      {
+        "id": "xsign-beanie-classic",
+        "title": "X-SIGN RIBBED BEANIE (Embroidered Crest)",
+        "size": "ONE SIZE",
+        "colorName": "Chalk White / Obsidian Crest",
+        "quantity": 1,
+        "priceGHS": 149
+      }
+    ],
+    "subtotalGHS": 149,
+    "deliveryFeeGHS": 45,
+    "totalGHS": 194,
+    "id": "ord_1793430444212_99zf",
+    "status": "received",
+    "createdAt": "2026-10-31T07:07:24.212Z"
+  },
+  {
+    "orderNumber": "ORD-934024",
+    "customerName": "Emmanuel Addai Owusu",
+    "customerEmail": "legitimatebeanslittleton123@gmail.com",
+    "customerPhone": "+233530813362",
+    "deliveryCity": "Accra",
+    "deliveryAddress": "Accra",
+    "notes": "",
+    "items": [
+      {
+        "id": "xsign-beanie-classic",
+        "title": "X-SIGN RIBBED BEANIE (Embroidered Crest)",
+        "size": "ONE SIZE",
+        "colorName": "Pitch Black / White Crest",
+        "quantity": 1,
+        "priceGHS": 149
+      }
+    ],
+    "subtotalGHS": 149,
+    "deliveryFeeGHS": 45,
+    "totalGHS": 194,
+    "id": "ord_1793423025646_f4c7",
+    "status": "dispatched",
+    "createdAt": "2026-10-31T05:03:45.646Z"
+  },
+  {
+    "orderNumber": "ORD-542383",
+    "customerName": "Emmanuel Addai Owusu",
+    "customerEmail": "legitimatebeanslittleton123@gmail.com",
+    "customerPhone": "+233530813362",
+    "deliveryCity": "Accra",
+    "deliveryAddress": "Accra",
+    "notes": "",
+    "items": [
+      {
+        "id": "xsign-beanie-classic",
+        "title": "X-SIGN RIBBED BEANIE (Embroidered Crest)",
+        "size": "ONE SIZE",
+        "colorName": "Pitch Black / White Crest",
+        "quantity": 1,
+        "priceGHS": 149
+      }
+    ],
+    "subtotalGHS": 149,
+    "deliveryFeeGHS": 45,
+    "totalGHS": 194,
+    "id": "ord_1793421012478_y4ks",
+    "status": "dispatched",
+    "createdAt": "2026-10-31T04:30:12.478Z"
+  }
+]
