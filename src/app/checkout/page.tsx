@@ -386,40 +386,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Payment Section - Clean Luxury Streetwear */}
-              <div className="p-6 rounded-2xl bg-[#0c0d12] border border-white/10 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
-                    Payment Method
-                  </h3>
-                  <span className="text-xs text-zinc-400">
-                    MoMo & WhatsApp
-                  </span>
-                </div>
 
-                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-start gap-3.5">
-                  <div className="w-9 h-9 rounded-lg bg-[#25D366]/15 flex items-center justify-center shrink-0 text-[#25D366] mt-0.5">
-                    <WhatsAppIcon className="w-5 h-5 text-[#25D366]" />
-                  </div>
-                  <div className="space-y-1.5 flex-1">
-                    <p className="text-xs font-semibold text-white">
-                      Confirm on WhatsApp
-                    </p>
-                    <p className="text-xs text-zinc-400 leading-relaxed">
-                      When you submit your order, your details will open directly in WhatsApp to finalize payment with MTN MoMo, Telecel Cash, or Bank Transfer.
-                    </p>
-                    <div className="flex items-center gap-2 pt-1 flex-wrap text-[11px] text-zinc-500">
-                      <span>MTN MoMo</span>
-                      <span>•</span>
-                      <span>Telecel Cash</span>
-                      <span>•</span>
-                      <span>Bank Transfer</span>
-                      <span>•</span>
-                      <span>Accra Same-Day Dispatch</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Right Column: Order Summary */}

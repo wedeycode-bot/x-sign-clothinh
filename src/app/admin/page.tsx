@@ -31,6 +31,7 @@ import {
   MapPin,
   Clock,
   Camera,
+  Palette,
 } from 'lucide-react';
 
 /* Inline Stock Modifier Component */
@@ -186,6 +187,28 @@ export default function AdminPage() {
   // Modals & Forms
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [newMockupUrl, setNewMockupUrl] = useState('');
+  const [newColorName, setNewColorName] = useState('');
+  const [newColorHex, setNewColorHex] = useState('#000000');
+  const [newColorMockup, setNewColorMockup] = useState('');
+
+  const shirtMockupPresets = [
+    { label: 'White / Red Cross', path: '/products/shirts/IMG_4266.PNG', hex: '#FFFFFF' },
+    { label: 'Black / Red Cross', path: '/products/shirts/IMG_4251.PNG', hex: '#111111' },
+    { label: 'Black / Green Cross', path: '/products/shirts/IMG_4260.PNG', hex: '#1A3320' },
+    { label: 'Black / White Cross', path: '/products/shirts/IMG_4261.PNG', hex: '#1C1C1E' },
+    { label: 'Black / Gold Cross', path: '/products/shirts/IMG_4263.PNG', hex: '#2A2415' },
+    { label: 'White / Black Cross', path: '/products/shirts/IMG_4250.PNG', hex: '#F5F5F5' },
+  ];
+
+  const capMockupPresets = [
+    { label: 'Black Distressed Trucker', path: '/products/caps/IMG_3375.PNG', hex: '#18181B' },
+    { label: 'White Knitted Beanie', path: '/products/caps/IMG_4195.PNG', hex: '#F4F4F5' },
+    { label: 'Black Knitted Beanie', path: '/products/caps/IMG_4202.PNG', hex: '#18181B' },
+    { label: 'Army Olive Wash Cap', path: '/products/caps/IMG_4216.PNG', hex: '#3E4233' },
+    { label: 'Crimson Embroidered Cap', path: '/products/caps/IMG_4220.PNG', hex: '#7F1D1D' },
+    { label: 'Earth Washed Cap', path: '/products/caps/IMG_4228.PNG', hex: '#453229' },
+  ];
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -1517,6 +1540,272 @@ export default function AdminPage() {
                 >
                   {editingProduct.isSoldOut ? 'SOLD OUT' : 'IN STOCK'}
                 </button>
+              </div>
+
+              {/* Product Mockup Pictures (Packshots & Cutouts) */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-black/10 dark:border-white/10 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-950 dark:text-white flex items-center gap-2">
+                      <Camera className="w-4 h-4 text-emerald-500" />
+                      <span>Product Mockup Pictures ({(editingProduct.images || []).length})</span>
+                    </h4>
+                    <p className="text-[11px] text-zinc-500 mt-0.5">
+                      Cutouts & packshots that showcase this piece on the shop and product page.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Gallery of current mockups */}
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                  {(editingProduct.images || []).map((img, idx) => {
+                    const isCover = idx === 0;
+                    return (
+                      <div
+                        key={idx}
+                        className={`group relative aspect-[4/5] rounded-xl overflow-hidden border p-1 bg-white dark:bg-black/60 transition-all ${
+                          isCover ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-black/10 dark:border-white/10'
+                        }`}
+                      >
+                        <div className="relative w-full h-full">
+                          <Image
+                            src={img}
+                            alt=""
+                            fill
+                            className={img.toLowerCase().endsWith('.png') ? 'object-contain p-1' : 'object-cover'}
+                          />
+                        </div>
+                        {isCover && (
+                          <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-emerald-500 text-black text-[9px] font-mono font-bold uppercase">
+                            Cover
+                          </span>
+                        )}
+                        <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-1">
+                          {!isCover && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newImages = [img, ...editingProduct.images.filter((_, i) => i !== idx)];
+                                setEditingProduct({ ...editingProduct, images: newImages });
+                              }}
+                              className="px-2 py-1 rounded bg-white text-black text-[9px] font-bold uppercase tracking-wider shadow"
+                            >
+                              Make Cover
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newImages = editingProduct.images.filter((_, i) => i !== idx);
+                              setEditingProduct({ ...editingProduct, images: newImages });
+                            }}
+                            className="p-1.5 rounded-lg bg-rose-500 text-white shadow hover:bg-rose-600 transition-colors"
+                            title="Remove picture"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Add new mockup image */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter mockup image path or URL (e.g. /products/shirts/IMG_4266.PNG)"
+                    value={newMockupUrl}
+                    onChange={(e) => setNewMockupUrl(e.target.value)}
+                    className="flex-1 h-10 px-3 rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white placeholder-zinc-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!newMockupUrl.trim()) return;
+                      const updated = [...(editingProduct.images || []), newMockupUrl.trim()];
+                      setEditingProduct({ ...editingProduct, images: updated });
+                      setNewMockupUrl('');
+                    }}
+                    className="h-10 px-4 rounded-xl bg-black text-white dark:bg-white dark:text-black text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shrink-0"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Mockup</span>
+                  </button>
+                </div>
+
+                {/* Quick Add Presets */}
+                <div className="space-y-1.5 pt-1">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">
+                    Quick Preset Cutouts from Atelier Assets:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(editingProduct.category === 'accessories' ? capMockupPresets : shirtMockupPresets).map((preset) => {
+                      const alreadyAdded = (editingProduct.images || []).includes(preset.path);
+                      return (
+                        <button
+                          key={preset.path}
+                          type="button"
+                          onClick={() => {
+                            if (alreadyAdded) return;
+                            const updated = [...(editingProduct.images || []), preset.path];
+                            setEditingProduct({ ...editingProduct, images: updated });
+                          }}
+                          disabled={alreadyAdded}
+                          className={`text-[11px] px-2.5 py-1 rounded-lg border font-mono transition-all flex items-center gap-1.5 ${
+                            alreadyAdded
+                              ? 'opacity-40 border-black/5 dark:border-white/5 cursor-not-allowed text-zinc-500'
+                              : 'border-black/15 dark:border-white/15 bg-white dark:bg-zinc-800 hover:border-black dark:hover:border-white text-zinc-800 dark:text-zinc-200'
+                          }`}
+                        >
+                          <span className="w-2.5 h-2.5 rounded-full border border-black/20" style={{ backgroundColor: preset.hex }} />
+                          <span>{preset.label}</span>
+                          {!alreadyAdded && <Plus className="w-3 h-3 text-zinc-400" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Designs & Colours Display Section */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-black/10 dark:border-white/10 space-y-4">
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-950 dark:text-white flex items-center gap-2">
+                    <Palette className="w-4 h-4 text-amber-500" />
+                    <span>Designs & Colourways ({(editingProduct.colors || []).length})</span>
+                  </h4>
+                  <p className="text-[11px] text-zinc-500 mt-0.5">
+                    Displays swatches on the Shop page. When shoppers tap or hover a swatch, the product card instantly displays that design\'s mockup picture.
+                  </p>
+                </div>
+
+                {/* List of current designs */}
+                <div className="space-y-2">
+                  {(editingProduct.colors || []).map((col, idx) => {
+                    const colMockup = col.images?.[0] || editingProduct.images[0];
+                    return (
+                      <div
+                        key={idx}
+                        className="p-3 rounded-xl bg-white dark:bg-black/40 border border-black/10 dark:border-white/10 flex items-center justify-between gap-3"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span
+                            className="w-6 h-6 rounded-full border border-black/20 dark:border-white/20 shrink-0 shadow-sm"
+                            style={{ backgroundColor: col.hex }}
+                          />
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-zinc-950 dark:text-white truncate">
+                              {col.name}
+                            </p>
+                            <p className="text-[10px] font-mono text-zinc-500 uppercase">
+                              Hex: {col.hex} {colMockup ? `• Mockup: ${colMockup.split('/').pop()}` : ''}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          {colMockup && (
+                            <div className="relative w-8 h-10 rounded border border-black/10 dark:border-white/10 overflow-hidden bg-white dark:bg-black/60">
+                              <Image src={colMockup} alt="" fill className="object-contain p-0.5" />
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if ((editingProduct.colors?.length || 0) <= 1) {
+                                alert('A product must have at least one design or colourway.');
+                                return;
+                              }
+                              const updated = editingProduct.colors.filter((_, i) => i !== idx);
+                              setEditingProduct({ ...editingProduct, colors: updated });
+                            }}
+                            className="w-8 h-8 rounded-lg border border-black/10 dark:border-white/10 hover:border-rose-500 hover:bg-rose-500/10 flex items-center justify-center text-zinc-500 hover:text-rose-500 transition-colors"
+                            title="Remove design"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Add new design subform */}
+                <div className="p-3.5 rounded-xl border border-dashed border-black/20 dark:border-white/20 bg-white/50 dark:bg-black/20 space-y-3">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 block">
+                    + Add Available Design / Colour
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <div className="space-y-1 sm:col-span-1">
+                      <label className="text-[10px] uppercase font-mono text-zinc-500">Design Name</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Acid Wash Green"
+                        value={newColorName}
+                        onChange={(e) => setNewColorName(e.target.value)}
+                        className="w-full h-9 px-2.5 rounded-lg bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-xs text-zinc-950 dark:text-white"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-mono text-zinc-500">Color Swatch</label>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="color"
+                          value={newColorHex}
+                          onChange={(e) => setNewColorHex(e.target.value)}
+                          className="w-9 h-9 p-0.5 rounded-lg border border-black/10 dark:border-white/10 bg-transparent cursor-pointer shrink-0"
+                        />
+                        <input
+                          type="text"
+                          value={newColorHex}
+                          onChange={(e) => setNewColorHex(e.target.value)}
+                          className="flex-1 h-9 px-2 rounded-lg bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white uppercase"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] uppercase font-mono text-zinc-500">Assigned Mockup</label>
+                      <select
+                        value={newColorMockup}
+                        onChange={(e) => setNewColorMockup(e.target.value)}
+                        className="w-full h-9 px-2 rounded-lg bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-xs text-zinc-950 dark:text-white"
+                      >
+                        <option value="">Default Product Cover</option>
+                        {(editingProduct.images || []).map((img, i) => (
+                          <option key={i} value={img}>
+                            Mockup {i + 1}: {img.split('/').pop()}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex justify-end pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newColorName.trim()) {
+                          alert('Please enter a name for the design / colourway.');
+                          return;
+                        }
+                        const assignedImg = newColorMockup || editingProduct.images[0] || '';
+                        const newCol = {
+                          name: newColorName.trim(),
+                          hex: newColorHex,
+                          images: assignedImg ? [assignedImg] : [],
+                        };
+                        const updated = [...(editingProduct.colors || []), newCol];
+                        setEditingProduct({ ...editingProduct, colors: updated });
+                        setNewColorName('');
+                        setNewColorMockup('');
+                      }}
+                      className="h-9 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-sm"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Design Swatch</span>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Subtitle */}
