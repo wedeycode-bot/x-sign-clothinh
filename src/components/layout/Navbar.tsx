@@ -10,6 +10,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { CurrencyCode } from '@/types/product';
 import { BRAND_CONFIG } from '@/config/brand';
 import { ShoppingBag, Search, Menu, X, ChevronDown, Sun, Moon } from 'lucide-react';
+import { SocialLinks } from '@/components/common/SocialLinks';
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
@@ -262,7 +263,7 @@ export const Navbar: React.FC = () => {
             </nav>
           </div>
 
-          <div className="space-y-4 pt-8 border-t border-black/10 dark:border-white/10 font-mono text-xs">
+          <div className="space-y-4 pt-6 border-t border-black/10 dark:border-white/10 font-mono text-xs">
             <div className="flex items-center justify-between text-zinc-600 dark:text-zinc-400">
               <span>SELECT CURRENCY</span>
               <div className="flex items-center gap-2">
@@ -280,7 +281,18 @@ export const Navbar: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-2 text-zinc-500 text-[11px]">
+            {/* Social media links matching the mobile menu design */}
+            <div className="pt-4 border-t border-black/10 dark:border-white/10 space-y-3">
+              <SocialLinks
+                className="flex items-center justify-between max-w-xs"
+                iconClassName="text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-all hover:scale-110 active:scale-95"
+              />
+              <p className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 tracking-tight">
+                No weapon formed against us shall prosper — Isaiah 54:17
+              </p>
+            </div>
+
+            <div className="pt-1 text-zinc-500 text-[11px]">
               <p>{BRAND_CONFIG.name} • {BRAND_CONFIG.subTitle}</p>
               <p>{BRAND_CONFIG.flagshipAddress}</p>
             </div>

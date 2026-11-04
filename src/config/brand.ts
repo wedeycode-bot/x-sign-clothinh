@@ -27,5 +27,7 @@ export const BRAND_CONFIG = {
     instagram: '@xsignclothing',
     twitter: '@xsignclothing',
     tiktok: '@xsignclothing',
+    youtube: '@xsignclothing',
+    twitch: 'xsignclothing',
   },
 };

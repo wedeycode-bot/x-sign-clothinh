@@ -7,6 +7,7 @@ import { useCart } from '@/context/CartContext';
 import { useTheme } from '@/context/ThemeContext';
 import { BRAND_CONFIG } from '@/config/brand';
 import { Check, ShieldCheck, Truck, RefreshCw, Send } from 'lucide-react';
+import { SocialLinks } from '@/components/common/SocialLinks';
 
 export const Footer: React.FC = () => {
   const { currency } = useCart();
@@ -109,6 +110,16 @@ export const Footer: React.FC = () => {
               SUPPORT: {BRAND_CONFIG.contactPhone} • {BRAND_CONFIG.contactEmail}
             </p>
           </div>
+
+          <div className="pt-2">
+            <span className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase block mb-2">
+              CONNECT WITH ATELIER
+            </span>
+            <SocialLinks
+              className="flex items-center gap-4"
+              iconClassName="text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-all hover:scale-110 active:scale-95"
+            />
+          </div>
         </div>
 
         {/* Column 1: Shop */}
@@ -171,9 +182,15 @@ export const Footer: React.FC = () => {
       </div>
 
       {/* Bottom Sub-Footer */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-black/10 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] font-mono text-zinc-500 dark:text-zinc-600">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-black/10 dark:border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 text-[11px] font-mono text-zinc-500 dark:text-zinc-600">
         <div>
           © {new Date().getFullYear()} {BRAND_CONFIG.name}. ALL RIGHTS RESERVED.
+        </div>
+        <div className="flex items-center gap-3">
+          <SocialLinks
+            className="flex items-center gap-4"
+            iconClassName="text-zinc-500 hover:text-black dark:hover:text-white transition-all hover:scale-110 active:scale-95"
+          />
         </div>
         <div className="flex items-center gap-6">
           <span>CURRENCY: {currency}</span>
