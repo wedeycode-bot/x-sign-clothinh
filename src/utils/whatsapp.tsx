@@ -64,7 +64,7 @@ ${itemsText}
 ━━━━━━━━━━━━━━━━━━━━
 💰 *PAYMENT BREAKDOWN:*
 • *Subtotal:* GH₵ ${subtotalGHS.toLocaleString()}
-• *Delivery Fee:* ${shippingFeeGHS === 0 ? 'FREE' : `GH₵ ${shippingFeeGHS.toLocaleString()}`}
+• *Delivery:* FREE (Complimentary)
 • *TOTAL PAYABLE:* *GH₵ ${grandTotalGHS.toLocaleString()}*
 • *Payment Channel:* WhatsApp Direct Pay
 ━━━━━━━━━━━━━━━━━━━━

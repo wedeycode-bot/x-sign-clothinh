@@ -32,9 +32,6 @@ export const CartDrawer: React.FC = () => {
 
   if (!isCartOpen) return null;
 
-  const FREE_SHIPPING_THRESHOLD_GHS = 1200;
-  const progressPercent = Math.min(100, (subtotalGHS / FREE_SHIPPING_THRESHOLD_GHS) * 100);
-  const remainingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD_GHS - subtotalGHS);
   const logoSrc = theme === 'light' ? BRAND_CONFIG.logoBlack : BRAND_CONFIG.logoWhite;
 
   return (
@@ -58,31 +55,6 @@ export const CartDrawer: React.FC = () => {
           >
             <X className="w-5 h-5" />
           </button>
-        </div>
-
-        {/* Free Shipping Meter (Ghana & Worldwide) */}
-        <div className="px-6 py-3 bg-zinc-100 dark:bg-white/[0.02] border-b border-black/10 dark:border-white/5">
-          <div className="flex items-center justify-between text-xs font-mono mb-1.5">
-            <span className="text-zinc-600 dark:text-zinc-400 flex items-center gap-1.5">
-              <Truck className="w-3.5 h-3.5 text-zinc-700 dark:text-zinc-300" />
-              {subtotalGHS >= FREE_SHIPPING_THRESHOLD_GHS ? (
-                <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-                  Unlocked Free Express Delivery in Ghana!
-                </span>
-              ) : (
-                <span>
-                  Add {formatPrice(remainingForFreeShipping)} for Free Ghana Delivery
-                </span>
-              )}
-            </span>
-            <span className="text-zinc-500">{Math.round(progressPercent)}%</span>
-          </div>
-          <div className="w-full h-1 bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-zinc-700 to-black dark:from-zinc-500 dark:to-white transition-all duration-300"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
         </div>
 
         {/* Item List */}

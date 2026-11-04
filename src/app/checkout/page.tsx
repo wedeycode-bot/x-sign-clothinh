@@ -30,22 +30,9 @@ export default function CheckoutPage() {
   const [orderId, setOrderId] = useState('');
   const [whatsappUrl, setWhatsappUrl] = useState('');
 
-  // Shipping cost calculation based on region and threshold
-  const FREE_SHIPPING_THRESHOLD_GHS = 1200;
-  const isFreeShipping = subtotalGHS >= FREE_SHIPPING_THRESHOLD_GHS;
-
-  let shippingFeeGHS = 0;
-  if (!isFreeShipping) {
-    if (isInternational) {
-      shippingFeeGHS = 420; // ~ $32 DHL Express International
-    } else if (selectedRegion === 'Greater Accra') {
-      shippingFeeGHS = 45; // Same day dispatch
-    } else {
-      shippingFeeGHS = 85; // Kumasi, Takoradi, etc. 24h
-    }
-  }
-
-  const grandTotalGHS = subtotalGHS + shippingFeeGHS;
+  // Complimentary delivery on all orders
+  const shippingFeeGHS = 0;
+  const grandTotalGHS = subtotalGHS;
 
   const [address, setAddress] = useState<ShippingAddress>({
     fullName: '',
@@ -470,17 +457,13 @@ export default function CheckoutPage() {
                   </div>
 
                   <div className="flex justify-between text-zinc-400">
-                    <span>Delivery ({isInternational ? 'DHL Global' : selectedRegion})</span>
-                    {isFreeShipping ? (
-                      <span className="text-emerald-400 font-semibold">FREE (Over GH₵ 1,200)</span>
-                    ) : (
-                      <span className="text-white">{formatPrice(shippingFeeGHS)}</span>
-                    )}
+                    <span>Delivery</span>
+                    <span className="text-emerald-400 font-semibold">FREE</span>
                   </div>
 
                   <div className="border-t border-white/10 pt-3 flex justify-between text-base font-bold text-white">
-                    <span>Grand Total ({currency})</span>
-                    <span className="text-emerald-400">{formatPrice(grandTotalGHS)}</span>
+                    <span>Total ({currency})</span>
+                    <span className="text-white">{formatPrice(grandTotalGHS)}</span>
                   </div>
                 </div>
 
