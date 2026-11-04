@@ -1,0 +1,130 @@
+[
+  {
+    "id": "look-01",
+    "image": "/products/caps/xsign-white-beanie-street-look.jpg",
+    "title": "Look 01 // X-SIGN Tribal Star Beanie & Rosary Chain",
+    "productSlug": "xsign-ribbed-beanie-classic",
+    "productTitle": "X-SIGN Ribbed Beanie (Chalk White)",
+    "orientation": "portrait"
+  },
+  {
+    "id": "look-02",
+    "image": "/campaign/models/IMG_4330.jpg",
+    "title": "Look 02 // Gothic Spine Chalk White Tee in Noir Studio",
+    "productSlug": "xsign-flex-tee",
+    "productTitle": "X-SIGN Flex Tee (White)",
+    "orientation": "portrait"
+  },
+  {
+    "id": "look-03",
+    "image": "/campaign/models/IMG_4368.jpg",
+    "title": "Look 03 // Sovereign Gold Foil Edition Runway Fit",
+    "productSlug": "xsign-flex-tee",
+    "productTitle": "X-SIGN Sovereign Gold Edition Tee",
+    "orientation": "portrait"
+  },
+  {
+    "id": "look-04",
+    "image": "/campaign/models/IMG_4292.jpg",
+    "title": "Look 04 // Official Campaign Atelier Ensemble",
+    "productSlug": "xsign-flex-tee",
+    "productTitle": "X-SIGN Flagship Collection",
+    "orientation": "landscape"
+  },
+  {
+    "id": "look-05",
+    "image": "/campaign/models/IMG_4338.jpg",
+    "title": "Look 05 // Onyx Black Gothic Spine Street Silhouette",
+    "productSlug": "xsign-flex-tee",
+    "productTitle": "X-SIGN Flex Tee (Black)",
+    "orientation": "portrait"
+  },
+  {
+    "id": "look-06",
+    "image": "/campaign/models/IMG_4362.jpg",
+    "title": "Look 06 // Chalk White Ribbed Beanie with Obsidian Crest",
+    "productSlug": "xsign-ribbed-beanie-classic",
+    "productTitle": "X-SIGN Ribbed Beanie (Chalk White)",
+    "orientation": "portrait"
+  },
+  {
+    "id": "look-07",
+    "image": "/campaign/models/IMG_4472.jpg",
+    "title": "Look 07 // Celestial Gold Artwork on Heavyweight White Tee",
+    "productSlug": "xsign-flex-tee",
+    "productTitle": "X-SIGN Celestial Gold Edition Tee",
+    "orientation": "portrait"
+  },
+  {
+    "id": "look-08",
+    "image": "/campaign/models/IMG_4372.jpg",
+    "title": "Look 08 // The Dual Stance — White & Black Gothic Back Art",
+    "productSlug": "xsign-flex-tee",
+    "productTitle": "Gothic Spine Collection",
+    "orientation": "landscape"
+  },
+  {
+    "id": "look-09",
+    "image": "/campaign/models/IMG_4379.jpg",
+    "title": "Look 09 // Dark Noir Headwear & Ribbed Knit Drape",
+    "productSlug": "xsign-ribbed-beanie-classic",
+    "productTitle": "X-SIGN Ribbed Beanie (Onyx Black)",
+    "orientation": "portrait"
+  },
+  {
+    "id": "look-10",
+    "image": "/campaign/models/IMG_4295.jpg",
+    "title": "Look 10 // Runway Boxy Streetwear Silhouette",
+    "productSlug": "xsign-flex-tee",
+    "productTitle": "Oversized Boxy Drape",
+    "orientation": "portrait"
+  },
+  {
+    "id": "look-11",
+    "image": "/campaign/models/IMG_4394.jpg",
+    "title": "Look 11 // Diamond Starlight Edition in High-Contrast Studio",
+    "productSlug": "xsign-flex-tee",
+    "productTitle": "X-SIGN Diamond Starlight Tee",
+    "orientation": "portrait"
+  },
+  {
+    "id": "look-12",
+    "image": "/campaign/models/IMG_4387.jpg",
+    "title": "Look 12 // Sovereign Gold Shimmer Beanie Studio Shot",
+    "productSlug": "xsign-ribbed-beanie-glitter-gold",
+    "productTitle": "X-SIGN Ribbed Beanie (Gold Shimmer)",
+    "orientation": "portrait"
+  },
+  {
+    "id": "look-13",
+    "image": "/campaign/models/IMG_4348.jpg",
+    "title": "Look 13 // Architectural Studio Group Drape",
+    "productSlug": "xsign-flex-tee",
+    "productTitle": "Drop 01 Atelier Shoot",
+    "orientation": "landscape"
+  },
+  {
+    "id": "look-14",
+    "image": "/campaign/models/IMG_4397.jpg",
+    "title": "Look 14 // Mocha Camel Beanie & Minimalist Street Fit",
+    "productSlug": "xsign-ribbed-beanie-classic",
+    "productTitle": "X-SIGN Ribbed Beanie (Mocha Camel)",
+    "orientation": "portrait"
+  },
+  {
+    "id": "look-15",
+    "image": "/campaign/models/IMG_4323.jpg",
+    "title": "Look 15 // Obsidian Heavyweight Vertebrae Silhouette",
+    "productSlug": "xsign-flex-tee",
+    "productTitle": "X-SIGN Gothic Spine Tee",
+    "orientation": "portrait"
+  },
+  {
+    "id": "look-16",
+    "image": "/campaign/models/IMG_4332.jpg",
+    "title": "Look 16 // High Rib Collar & Drop Shoulder Tailoring",
+    "productSlug": "xsign-flex-tee",
+    "productTitle": "Architectural Drop Shoulder",
+    "orientation": "portrait"
+  }
+]

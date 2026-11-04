@@ -30,6 +30,7 @@ import {
   Phone,
   MapPin,
   Clock,
+  Camera,
 } from 'lucide-react';
 
 /* Inline Stock Modifier Component */
@@ -220,10 +221,22 @@ export default function AdminPage() {
     }
   };
 
-  // Orders Management State
-  const [activeTab, setActiveTab] = useState<'inventory' | 'orders'>('inventory');
+  // Orders & Lookbook Management State
+  const [activeTab, setActiveTab] = useState<'inventory' | 'orders' | 'lookbook'>('inventory');
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+
+  // Lookbook State
+  const [lookbookItems, setLookbookItems] = useState<any[]>([]);
+  const [isLoadingLookbook, setIsLoadingLookbook] = useState(false);
+  const [isAddLookModalOpen, setIsAddLookModalOpen] = useState(false);
+  const [newLook, setNewLook] = useState({
+    title: '',
+    image: '',
+    productSlug: 'xsign-flex-tee',
+    productTitle: 'X-SIGN Flex Tee',
+    orientation: 'portrait' as 'portrait' | 'landscape',
+  });
 
   const fetchOrders = async () => {
     setIsLoadingOrders(true);
@@ -240,9 +253,95 @@ export default function AdminPage() {
     }
   };
 
+  const fetchLookbook = async () => {
+    setIsLoadingLookbook(true);
+    try {
+      const res = await fetch('/api/lookbook');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.items)) {
+        setLookbookItems(data.items);
+      }
+    } catch (err) {
+      console.error('Failed to fetch lookbook:', err);
+    } finally {
+      setIsLoadingLookbook(false);
+    }
+  };
+
   useEffect(() => {
     fetchOrders();
+    fetchLookbook();
   }, []);
+
+  const handleAddLook = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newLook.title.trim() || !newLook.image.trim()) {
+      alert('Please provide a title and an image URL or path.');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/lookbook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newLook),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setNotification({
+          type: 'success',
+          message: `Model photo "${newLook.title}" published to Lookbook!`,
+        });
+        setIsAddLookModalOpen(false);
+        setNewLook({
+          title: '',
+          image: '',
+          productSlug: 'xsign-flex-tee',
+          productTitle: 'X-SIGN Flex Tee',
+          orientation: 'portrait',
+        });
+        fetchLookbook();
+      } else {
+        setNotification({
+          type: 'error',
+          message: data.message || 'Failed to add model photo',
+        });
+      }
+    } catch (err) {
+      console.error('Error adding look:', err);
+      setNotification({
+        type: 'error',
+        message: 'Network error adding lookbook item',
+      });
+    }
+  };
+
+  const handleDeleteLook = async (id: string, title: string) => {
+    if (!confirm(`Are you sure you want to remove "${title}" from the lookbook?`)) return;
+
+    try {
+      const res = await fetch(`/api/lookbook?id=${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        setNotification({
+          type: 'success',
+          message: `Model photo removed from lookbook.`,
+        });
+        fetchLookbook();
+      } else {
+        setNotification({
+          type: 'error',
+          message: data.message || 'Failed to delete lookbook item',
+        });
+      }
+    } catch (err) {
+      console.error('Error deleting look:', err);
+      setNotification({
+        type: 'error',
+        message: 'Network error deleting lookbook item',
+      });
+    }
+  };
 
   const handleUpdateOrderStatus = async (orderId: string, status: string, sendEmail: boolean = true) => {
     try {
@@ -786,11 +885,11 @@ export default function AdminPage() {
         </button>
       </div>
 
-      {/* Primary Section Switcher: Catalog vs Customer Orders */}
-      <div className="flex items-center gap-3 border-b border-black/10 dark:border-white/10 pb-4 mb-8">
+      {/* Primary Section Switcher: Catalog vs Customer Orders vs Lookbook Models */}
+      <div className="flex items-center gap-2 sm:gap-3 border-b border-black/10 dark:border-white/10 pb-4 mb-8 overflow-x-auto no-scrollbar">
         <button
           onClick={() => setActiveTab('inventory')}
-          className={`h-11 px-5 rounded-xl font-sans font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all ${
+          className={`h-11 px-5 rounded-xl font-sans font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap ${
             activeTab === 'inventory'
               ? 'bg-black text-white dark:bg-white dark:text-black shadow-md'
               : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
@@ -805,7 +904,7 @@ export default function AdminPage() {
             setActiveTab('orders');
             fetchOrders();
           }}
-          className={`h-11 px-5 rounded-xl font-sans font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all ${
+          className={`h-11 px-5 rounded-xl font-sans font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap ${
             activeTab === 'orders'
               ? 'bg-black text-white dark:bg-white dark:text-black shadow-md'
               : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
@@ -816,6 +915,21 @@ export default function AdminPage() {
           {orders.filter((o) => o.status === 'received').length > 0 && (
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           )}
+        </button>
+
+        <button
+          onClick={() => {
+            setActiveTab('lookbook');
+            fetchLookbook();
+          }}
+          className={`h-11 px-5 rounded-xl font-sans font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap ${
+            activeTab === 'lookbook'
+              ? 'bg-black text-white dark:bg-white dark:text-black shadow-md'
+              : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
+          }`}
+        >
+          <Camera className="w-4 h-4" />
+          <span>Lookbook Models ({lookbookItems.length})</span>
         </button>
       </div>
 
@@ -977,6 +1091,110 @@ export default function AdminPage() {
                 </div>
               </div>
             ))
+          )}
+        </div>
+      ) : activeTab === 'lookbook' ? (
+        /* LOOKBOOK MANAGEMENT VIEW */
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-black/10 dark:border-white/10">
+            <div>
+              <h2 className="text-lg font-bold uppercase tracking-tight text-zinc-950 dark:text-white">
+                Runway & Model Lookbook
+              </h2>
+              <p className="text-xs text-zinc-500">
+                Manage model photographs showcased on your public Lookbook page and storefront editorial strip.
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/lookbook"
+                target="_blank"
+                className="h-10 px-4 rounded-xl border border-black/10 dark:border-white/10 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white transition-colors"
+              >
+                <span>View Live Lookbook</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
+              <button
+                onClick={() => setIsAddLookModalOpen(true)}
+                className="h-10 px-5 rounded-xl bg-black text-white dark:bg-white dark:text-black font-semibold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md hover:opacity-90 transition-opacity"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Model Photo</span>
+              </button>
+            </div>
+          </div>
+
+          {isLoadingLookbook ? (
+            <div className="p-12 text-center text-zinc-500 font-mono text-xs">
+              Loading lookbook photos...
+            </div>
+          ) : lookbookItems.length === 0 ? (
+            <div className="p-12 text-center rounded-2xl border border-dashed border-black/15 dark:border-white/15 space-y-3">
+              <Camera className="w-8 h-8 text-zinc-400 mx-auto" />
+              <p className="text-sm font-semibold text-zinc-950 dark:text-white">No model photos in lookbook yet</p>
+              <p className="text-xs text-zinc-500">Click &ldquo;Add Model Photo&rdquo; to upload or select campaign model shots.</p>
+              <button
+                onClick={() => setIsAddLookModalOpen(true)}
+                className="px-4 py-2 rounded-xl bg-black text-white dark:bg-white dark:text-black text-xs font-semibold uppercase"
+              >
+                Add First Photo
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {lookbookItems.map((look) => (
+                <div
+                  key={look.id}
+                  className="group relative rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 bg-white dark:bg-[#0c0d12] flex flex-col shadow-sm"
+                >
+                  <div className={`relative w-full ${look.orientation === 'landscape' ? 'aspect-[16/10]' : 'aspect-[3/4]'} bg-zinc-900 overflow-hidden`}>
+                    <Image
+                      src={look.image}
+                      alt={look.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-[10px] font-mono text-white uppercase">
+                      {look.orientation}
+                    </div>
+                    <button
+                      onClick={() => handleDeleteLook(look.id, look.title)}
+                      className="absolute top-2.5 right-2.5 p-2 rounded-lg bg-black/70 hover:bg-red-600 text-white transition-colors shadow-lg"
+                      title="Remove from lookbook"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="p-4 flex flex-col justify-between flex-1 space-y-2">
+                    <div>
+                      <p className="text-xs font-bold text-zinc-950 dark:text-white line-clamp-2">
+                        {look.title}
+                      </p>
+                      {look.productTitle && (
+                        <p className="text-[11px] text-zinc-500 pt-0.5 truncate">
+                          Piece: {look.productTitle}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="pt-2 border-t border-black/5 dark:border-white/5 flex items-center justify-between text-[11px]">
+                      <span className="font-mono text-zinc-400">ID: {look.id}</span>
+                      {look.productSlug && (
+                        <Link
+                          href={`/product/${look.productSlug}`}
+                          target="_blank"
+                          className="text-zinc-600 dark:text-zinc-300 hover:text-black dark:hover:text-white flex items-center gap-1 font-medium"
+                        >
+                          <span>Shop Piece</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       ) : (
@@ -1621,6 +1839,173 @@ export default function AdminPage() {
                       <span>Publish Piece to Catalog</span>
                     </>
                   )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ADD LOOKBOOK MODEL PHOTO MODAL */}
+      {isAddLookModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md overflow-y-auto">
+          <div className="w-full max-w-2xl bg-white dark:bg-[#0c0d12] border border-black/15 dark:border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl my-8 relative overflow-hidden">
+            <div className="flex items-center justify-between pb-5 mb-6 border-b border-black/10 dark:border-white/10">
+              <div>
+                <span className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase block mb-1">
+                  X-SIGN ATELIER // LOOKBOOK CMS
+                </span>
+                <h3 className="text-xl font-bold uppercase tracking-tight text-zinc-950 dark:text-white">
+                  Add Model Photo to Lookbook
+                </h3>
+              </div>
+              <button
+                onClick={() => setIsAddLookModalOpen(false)}
+                className="w-9 h-9 rounded-full border border-black/10 dark:border-white/10 flex items-center justify-center text-zinc-500 hover:text-black dark:hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddLook} className="space-y-6">
+              {/* Look Title */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                  Look Title / Caption *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newLook.title}
+                  onChange={(e) => setNewLook({ ...newLook, title: e.target.value })}
+                  placeholder="e.g. Look 17 // Model in Sovereign Gold Street Fit"
+                  className="w-full h-11 px-4 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs text-zinc-950 dark:text-white focus:outline-none focus:border-black dark:focus:border-white"
+                />
+              </div>
+
+              {/* Image URL or Path */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                  Model Photo Path / URL *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newLook.image}
+                  onChange={(e) => setNewLook({ ...newLook, image: e.target.value })}
+                  placeholder="e.g. /campaign/models/IMG_4298.jpg or https://..."
+                  className="w-full h-11 px-4 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white focus:outline-none focus:border-black dark:focus:border-white"
+                />
+
+                {/* Quick Select Preset Campaign Models */}
+                <div className="space-y-1.5 pt-2">
+                  <span className="text-[11px] text-zinc-500 font-sans">Or tap a studio model photo from your shoot:</span>
+                  <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+                    {[
+                      { label: 'IMG_4298', path: '/campaign/models/IMG_4298.jpg' },
+                      { label: 'IMG_4372', path: '/campaign/models/IMG_4372.jpg' },
+                      { label: 'IMG_4338', path: '/campaign/models/IMG_4338.jpg' },
+                      { label: 'IMG_4368', path: '/campaign/models/IMG_4368.jpg' },
+                      { label: 'IMG_4330', path: '/campaign/models/IMG_4330.jpg' },
+                      { label: 'IMG_4292', path: '/campaign/models/IMG_4292.jpg' },
+                      { label: 'Beanie Street', path: '/products/caps/xsign-white-beanie-street-look.jpg' },
+                      { label: 'IMG_4472', path: '/campaign/models/IMG_4472.jpg' },
+                      { label: 'IMG_4379', path: '/campaign/models/IMG_4379.jpg' },
+                      { label: 'IMG_4394', path: '/campaign/models/IMG_4394.jpg' },
+                      { label: 'IMG_4397', path: '/campaign/models/IMG_4397.jpg' },
+                      { label: 'IMG_4387', path: '/campaign/models/IMG_4387.jpg' },
+                      { label: 'IMG_4295', path: '/campaign/models/IMG_4295.jpg' },
+                      { label: 'IMG_4348', path: '/campaign/models/IMG_4348.jpg' },
+                      { label: 'IMG_4323', path: '/campaign/models/IMG_4323.jpg' },
+                    ].map((preset) => (
+                      <button
+                        key={preset.path}
+                        type="button"
+                        onClick={() => setNewLook({ ...newLook, image: preset.path })}
+                        className={`relative w-14 h-16 rounded-lg overflow-hidden shrink-0 border transition-all ${
+                          newLook.image === preset.path
+                            ? 'border-black dark:border-white ring-2 ring-black dark:ring-white'
+                            : 'border-black/10 dark:border-white/10 opacity-70 hover:opacity-100'
+                        }`}
+                        title={preset.label}
+                      >
+                        <Image src={preset.path} alt="" fill className="object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Tagged Product to Shop & Orientation */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                    Piece Worn by Model
+                  </label>
+                  <select
+                    value={newLook.productSlug}
+                    onChange={(e) => {
+                      const slug = e.target.value;
+                      const prod = products.find((p) => p.slug === slug);
+                      setNewLook({
+                        ...newLook,
+                        productSlug: slug,
+                        productTitle: prod ? prod.title : 'Featured Piece',
+                      });
+                    }}
+                    className="w-full h-11 px-4 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs text-zinc-950 dark:text-white focus:outline-none"
+                  >
+                    {products.map((p) => (
+                      <option key={p.id} value={p.slug}>
+                        {p.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                    Orientation
+                  </label>
+                  <select
+                    value={newLook.orientation}
+                    onChange={(e) => setNewLook({ ...newLook, orientation: e.target.value as any })}
+                    className="w-full h-11 px-4 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs text-zinc-950 dark:text-white focus:outline-none"
+                  >
+                    <option value="portrait">Portrait (3:4 - Single Column)</option>
+                    <option value="landscape">Landscape (16:10 - Wide Span)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Image Preview */}
+              {newLook.image && (
+                <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 flex items-center gap-4">
+                  <div className={`relative ${newLook.orientation === 'landscape' ? 'w-24 h-15' : 'w-16 h-20'} rounded-lg overflow-hidden bg-black shrink-0`}>
+                    <Image src={newLook.image} alt="Preview" fill className="object-cover" />
+                  </div>
+                  <div className="text-xs">
+                    <p className="font-semibold text-zinc-950 dark:text-white">Image Preview Active</p>
+                    <p className="text-zinc-500 font-mono text-[11px] truncate max-w-xs">{newLook.image}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Modal Actions */}
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-black/10 dark:border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setIsAddLookModalOpen(false)}
+                  className="h-11 px-5 rounded-xl border border-black/10 dark:border-white/10 text-xs font-semibold uppercase tracking-wider text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="h-11 px-6 rounded-xl bg-black text-white dark:bg-white dark:text-black font-sans font-bold text-xs uppercase tracking-widest hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-lg"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Publish to Lookbook</span>
                 </button>
               </div>
             </form>

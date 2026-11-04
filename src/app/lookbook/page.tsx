@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BRAND_CONFIG } from '@/config/brand';
 import { useTheme } from '@/context/ThemeContext';
 import { ArrowUpRight, Camera, Sparkles, X, ShoppingBag } from 'lucide-react';
 
-interface LookbookItem {
+export interface LookbookItem {
   id: string;
   image: string;
   title: string;
@@ -16,12 +16,12 @@ interface LookbookItem {
   orientation: 'portrait' | 'landscape';
 }
 
-const LOOKBOOK_ITEMS: LookbookItem[] = [
+const DEFAULT_LOOKBOOK_ITEMS: LookbookItem[] = [
   {
     id: 'look-01',
     image: '/products/caps/xsign-white-beanie-street-look.jpg',
     title: 'Look 01 // X-SIGN Tribal Star Beanie & Rosary Chain',
-    productSlug: 'xsign-ribbed-beanie-white-black',
+    productSlug: 'xsign-ribbed-beanie-classic',
     productTitle: 'X-SIGN Ribbed Beanie (Chalk White)',
     orientation: 'portrait',
   },
@@ -29,15 +29,15 @@ const LOOKBOOK_ITEMS: LookbookItem[] = [
     id: 'look-02',
     image: '/campaign/models/IMG_4330.jpg',
     title: 'Look 02 // Gothic Spine Chalk White Tee in Noir Studio',
-    productSlug: 'xsign-gothic-spine-tee-white',
-    productTitle: 'X-SIGN Gothic Spine Heavy Tee (White)',
+    productSlug: 'xsign-flex-tee',
+    productTitle: 'X-SIGN Flex Tee (White)',
     orientation: 'portrait',
   },
   {
     id: 'look-03',
     image: '/campaign/models/IMG_4368.jpg',
     title: 'Look 03 // Sovereign Gold Foil Edition Runway Fit',
-    productSlug: 'xsign-sovereign-gold-tee',
+    productSlug: 'xsign-flex-tee',
     productTitle: 'X-SIGN Sovereign Gold Edition Tee',
     orientation: 'portrait',
   },
@@ -45,7 +45,7 @@ const LOOKBOOK_ITEMS: LookbookItem[] = [
     id: 'look-04',
     image: '/campaign/models/IMG_4292.jpg',
     title: 'Look 04 // Official Campaign Atelier Ensemble',
-    productSlug: 'xsign-gothic-spine-tee-black',
+    productSlug: 'xsign-flex-tee',
     productTitle: 'X-SIGN Flagship Collection',
     orientation: 'landscape',
   },
@@ -53,15 +53,15 @@ const LOOKBOOK_ITEMS: LookbookItem[] = [
     id: 'look-05',
     image: '/campaign/models/IMG_4338.jpg',
     title: 'Look 05 // Onyx Black Gothic Spine Street Silhouette',
-    productSlug: 'xsign-gothic-spine-tee-black',
-    productTitle: 'X-SIGN Gothic Spine Heavy Tee (Black)',
+    productSlug: 'xsign-flex-tee',
+    productTitle: 'X-SIGN Flex Tee (Black)',
     orientation: 'portrait',
   },
   {
     id: 'look-06',
     image: '/campaign/models/IMG_4362.jpg',
     title: 'Look 06 // Chalk White Ribbed Beanie with Obsidian Crest',
-    productSlug: 'xsign-ribbed-beanie-white-black',
+    productSlug: 'xsign-ribbed-beanie-classic',
     productTitle: 'X-SIGN Ribbed Beanie (Chalk White)',
     orientation: 'portrait',
   },
@@ -69,7 +69,7 @@ const LOOKBOOK_ITEMS: LookbookItem[] = [
     id: 'look-07',
     image: '/campaign/models/IMG_4472.jpg',
     title: 'Look 07 // Celestial Gold Artwork on Heavyweight White Tee',
-    productSlug: 'xsign-celestial-gold-tee-white',
+    productSlug: 'xsign-flex-tee',
     productTitle: 'X-SIGN Celestial Gold Edition Tee',
     orientation: 'portrait',
   },
@@ -77,7 +77,7 @@ const LOOKBOOK_ITEMS: LookbookItem[] = [
     id: 'look-08',
     image: '/campaign/models/IMG_4372.jpg',
     title: 'Look 08 // The Dual Stance — White & Black Gothic Back Art',
-    productSlug: 'xsign-gothic-spine-tee-white',
+    productSlug: 'xsign-flex-tee',
     productTitle: 'Gothic Spine Collection',
     orientation: 'landscape',
   },
@@ -85,7 +85,7 @@ const LOOKBOOK_ITEMS: LookbookItem[] = [
     id: 'look-09',
     image: '/campaign/models/IMG_4379.jpg',
     title: 'Look 09 // Dark Noir Headwear & Ribbed Knit Drape',
-    productSlug: 'xsign-ribbed-beanie-black',
+    productSlug: 'xsign-ribbed-beanie-classic',
     productTitle: 'X-SIGN Ribbed Beanie (Onyx Black)',
     orientation: 'portrait',
   },
@@ -93,7 +93,7 @@ const LOOKBOOK_ITEMS: LookbookItem[] = [
     id: 'look-10',
     image: '/campaign/models/IMG_4295.jpg',
     title: 'Look 10 // Runway Boxy Streetwear Silhouette',
-    productSlug: 'xsign-gothic-spine-tee-black',
+    productSlug: 'xsign-flex-tee',
     productTitle: 'Oversized Boxy Drape',
     orientation: 'portrait',
   },
@@ -101,7 +101,7 @@ const LOOKBOOK_ITEMS: LookbookItem[] = [
     id: 'look-11',
     image: '/campaign/models/IMG_4394.jpg',
     title: 'Look 11 // Diamond Starlight Edition in High-Contrast Studio',
-    productSlug: 'xsign-diamond-starlight-tee',
+    productSlug: 'xsign-flex-tee',
     productTitle: 'X-SIGN Diamond Starlight Tee',
     orientation: 'portrait',
   },
@@ -109,7 +109,7 @@ const LOOKBOOK_ITEMS: LookbookItem[] = [
     id: 'look-12',
     image: '/campaign/models/IMG_4387.jpg',
     title: 'Look 12 // Sovereign Gold Shimmer Beanie Studio Shot',
-    productSlug: 'xsign-ribbed-beanie-gold',
+    productSlug: 'xsign-ribbed-beanie-glitter-gold',
     productTitle: 'X-SIGN Ribbed Beanie (Gold Shimmer)',
     orientation: 'portrait',
   },
@@ -117,7 +117,7 @@ const LOOKBOOK_ITEMS: LookbookItem[] = [
     id: 'look-13',
     image: '/campaign/models/IMG_4348.jpg',
     title: 'Look 13 // Architectural Studio Group Drape',
-    productSlug: 'xsign-gothic-spine-tee-white',
+    productSlug: 'xsign-flex-tee',
     productTitle: 'Drop 01 Atelier Shoot',
     orientation: 'landscape',
   },
@@ -125,7 +125,7 @@ const LOOKBOOK_ITEMS: LookbookItem[] = [
     id: 'look-14',
     image: '/campaign/models/IMG_4397.jpg',
     title: 'Look 14 // Mocha Camel Beanie & Minimalist Street Fit',
-    productSlug: 'xsign-ribbed-beanie-mocha',
+    productSlug: 'xsign-ribbed-beanie-classic',
     productTitle: 'X-SIGN Ribbed Beanie (Mocha Camel)',
     orientation: 'portrait',
   },
@@ -133,7 +133,7 @@ const LOOKBOOK_ITEMS: LookbookItem[] = [
     id: 'look-15',
     image: '/campaign/models/IMG_4323.jpg',
     title: 'Look 15 // Obsidian Heavyweight Vertebrae Silhouette',
-    productSlug: 'xsign-gothic-spine-tee-black',
+    productSlug: 'xsign-flex-tee',
     productTitle: 'X-SIGN Gothic Spine Tee',
     orientation: 'portrait',
   },
@@ -141,15 +141,27 @@ const LOOKBOOK_ITEMS: LookbookItem[] = [
     id: 'look-16',
     image: '/campaign/models/IMG_4332.jpg',
     title: 'Look 16 // High Rib Collar & Drop Shoulder Tailoring',
-    productSlug: 'xsign-gothic-spine-tee-black',
+    productSlug: 'xsign-flex-tee',
     productTitle: 'Architectural Drop Shoulder',
     orientation: 'portrait',
   },
 ];
 
 export default function LookbookPage() {
+  const [items, setItems] = useState<LookbookItem[]>(DEFAULT_LOOKBOOK_ITEMS);
   const [activeItem, setActiveItem] = useState<LookbookItem | null>(null);
   const { theme } = useTheme();
+
+  useEffect(() => {
+    fetch('/api/lookbook')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.items) && data.items.length > 0) {
+          setItems(data.items);
+        }
+      })
+      .catch((err) => console.warn('Could not fetch dynamic lookbook:', err));
+  }, []);
 
   const logoSrc = theme === 'light' ? BRAND_CONFIG.logoBlack : BRAND_CONFIG.logoWhite;
 
@@ -174,7 +186,7 @@ export default function LookbookPage() {
 
         {/* Gallery Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {LOOKBOOK_ITEMS.map((item) => (
+          {items.map((item) => (
             <div
               key={item.id}
               onClick={() => setActiveItem(item)}
