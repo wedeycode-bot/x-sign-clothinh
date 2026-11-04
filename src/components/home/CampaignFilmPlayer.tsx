@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSound } from '@/context/SoundContext';
 import { BRAND_CONFIG } from '@/config/brand';
-import { Play, Pause, Maximize2, ArrowRight } from 'lucide-react';
+import { Play, Pause, Maximize2, ArrowRight, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Scene {
   id: number;
@@ -79,11 +79,11 @@ export const CampaignFilmPlayer: React.FC = () => {
   const [currentSceneIdx, setCurrentSceneIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [isTheaterOpen, setIsTheaterOpen] = useState(false);
 
   const sceneDurationMs = 4500; // 4.5s per scene
-  const totalDurationSeconds = (SCENES.length * sceneDurationMs) / 1000;
 
+  // Auto-progress through scenes
   useEffect(() => {
     if (!isPlaying) return;
 
@@ -101,6 +101,29 @@ export const CampaignFilmPlayer: React.FC = () => {
     return () => clearInterval(interval);
   }, [isPlaying, currentSceneIdx]);
 
+  // Lock background scroll when Theater Mode is open
+  useEffect(() => {
+    if (isTheaterOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isTheaterOpen]);
+
+  // Escape key closes Theater Mode
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isTheaterOpen) {
+        setIsTheaterOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isTheaterOpen]);
+
   const currentScene = SCENES[currentSceneIdx];
 
   const handleTogglePlay = () => {
@@ -114,24 +137,15 @@ export const CampaignFilmPlayer: React.FC = () => {
     setProgress(0);
   };
 
-  const handleFullscreen = () => {
+  const handleOpenTheater = () => {
     playClick();
-    if (containerRef.current) {
-      if (!document.fullscreenElement) {
-        containerRef.current.requestFullscreen().catch(() => {});
-      } else {
-        document.exitFullscreen().catch(() => {});
-      }
-    }
+    setIsTheaterOpen(true);
   };
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-black/10 dark:border-white/5 transition-colors duration-200">
-      {/* Cinematic 16:9 Video Canvas Frame */}
-      <div
-        ref={containerRef}
-        className="relative w-full aspect-[16/9] max-h-[720px] rounded-3xl overflow-hidden bg-black border border-white/15 shadow-2xl group select-none"
-      >
+    <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-b border-black/10 dark:border-white/5 transition-colors duration-200">
+      {/* Video Canvas Frame: Optimized tall aspect-ratio on mobile so video & clothing are fully visible */}
+      <div className="relative w-full aspect-[4/5] sm:aspect-[16/9] min-h-[460px] sm:min-h-[500px] max-h-[720px] rounded-3xl overflow-hidden bg-black border border-white/15 shadow-2xl group select-none">
         {/* Scene Image with Ken Burns Push-In */}
         {SCENES.map((scene, idx) => (
           <div
@@ -145,7 +159,7 @@ export const CampaignFilmPlayer: React.FC = () => {
               alt={scene.title}
               fill
               priority={idx === 0}
-              className={`object-cover object-center ${
+              className={`object-cover object-top sm:object-center ${
                 currentSceneIdx === idx && isPlaying
                   ? 'scale-105 transition-transform duration-[4500ms] ease-out'
                   : 'scale-100'
@@ -154,33 +168,27 @@ export const CampaignFilmPlayer: React.FC = () => {
           </div>
         ))}
 
-        {/* Film Grain & Cinematic Letterbox Vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/40 z-20 pointer-events-none" />
+        {/* Subtle Vignette (lightened on mobile so the piece & model stay vivid and bright) */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-black/25 z-20 pointer-events-none" />
 
-        {/* Top Video Overlay Bar */}
-        <div className="absolute top-5 left-5 right-5 z-30 flex items-center justify-between text-xs font-mono">
-          <div className="flex items-center gap-3">
-            <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-zinc-300 font-sans uppercase tracking-wider text-[11px]">
-              X-SIGN CAMPAIGN
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleFullscreen}
-              className="p-2 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-white hover:bg-white hover:text-black transition-colors"
-              title="Fullscreen"
-            >
-              <Maximize2 className="w-4 h-4" />
-            </button>
-          </div>
+        {/* Top Video Overlay Bar - NO "X-SIGN CAMPAIGN" text badge */}
+        <div className="absolute top-4 sm:top-5 left-4 sm:left-5 right-4 sm:right-5 z-30 flex items-center justify-end text-xs font-mono">
+          <button
+            onClick={handleOpenTheater}
+            className="px-3.5 py-2 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-white hover:bg-white hover:text-black transition-all flex items-center gap-1.5 shadow-xl active:scale-95"
+            title="Make Video Bigger"
+            aria-label="Make Video Bigger"
+          >
+            <Maximize2 className="w-3.5 h-3.5" />
+            <span className="text-[11px] font-mono uppercase font-bold tracking-wider">Make Bigger</span>
+          </button>
         </div>
 
         {/* Center Floating Play/Pause Hover Button */}
         <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
           <button
             onClick={handleTogglePlay}
-            className="pointer-events-auto p-4 sm:p-5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white hover:scale-110 hover:bg-white hover:text-black transition-all shadow-2xl opacity-0 group-hover:opacity-100"
+            className="pointer-events-auto p-4 sm:p-5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-white hover:scale-110 hover:bg-white hover:text-black transition-all shadow-2xl opacity-80 sm:opacity-0 group-hover:opacity-100"
             aria-label={isPlaying ? 'Pause Film' : 'Play Film'}
           >
             {isPlaying ? <Pause className="w-6 h-6 sm:w-8 sm:h-8" /> : <Play className="w-6 h-6 sm:w-8 sm:h-8 ml-0.5" />}
@@ -188,28 +196,34 @@ export const CampaignFilmPlayer: React.FC = () => {
         </div>
 
         {/* Bottom Lower-Third Editorial Card */}
-        <div className="absolute bottom-6 left-6 right-6 z-30 flex flex-col sm:flex-row sm:items-end justify-between gap-4 pointer-events-none">
-          <div className="space-y-1.5 max-w-xl">
+        <div className="absolute bottom-5 sm:bottom-6 left-4 sm:left-6 right-4 sm:right-6 z-30 flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4 pointer-events-none">
+          <div className="space-y-1 max-w-xl">
             <div className="flex items-center gap-2 font-mono text-[10px] text-zinc-400 uppercase tracking-widest">
               <span className="text-white font-bold">{currentScene.timecode}</span>
               <span>•</span>
               <span>SCENE 0{currentScene.id} / 0{SCENES.length}</span>
-              <span>•</span>
-              <span>{BRAND_CONFIG.name}</span>
             </div>
-            <h3 className="text-xl sm:text-3xl font-black uppercase tracking-tight text-white font-display drop-shadow-md">
+            <h3 className="text-lg sm:text-3xl font-black uppercase tracking-tight text-white font-display drop-shadow-md">
               {currentScene.title}
             </h3>
-            <p className="text-xs sm:text-sm text-zinc-300 font-sans">
-              {currentScene.garment} • {currentScene.subtitle}
+            <p className="text-xs sm:text-sm text-zinc-300 font-sans line-clamp-1 sm:line-clamp-none">
+              {currentScene.garment}
             </p>
           </div>
 
-          <div className="pointer-events-auto flex items-center gap-3">
+          <div className="pointer-events-auto flex items-center gap-2.5 pt-1 sm:pt-0">
+            <button
+              onClick={handleOpenTheater}
+              className="sm:hidden px-4 py-2 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white font-mono font-bold text-[11px] uppercase tracking-wider flex items-center gap-1.5"
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+              <span>Fullscreen</span>
+            </button>
+
             <Link
               href={`/product/${currentScene.productSlug}`}
               onClick={playClick}
-              className="px-5 py-2.5 rounded-full bg-white text-black font-mono font-bold text-xs uppercase tracking-wider hover:bg-zinc-200 transition-all shadow-2xl flex items-center gap-1.5 whitespace-nowrap"
+              className="px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-white text-black font-mono font-bold text-xs uppercase tracking-wider hover:bg-zinc-200 transition-all shadow-2xl flex items-center gap-1.5 whitespace-nowrap"
             >
               <span>INSPECT IN SHOP</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -245,6 +259,117 @@ export const CampaignFilmPlayer: React.FC = () => {
           </button>
         ))}
       </div>
+
+      {/* IMMERSIVE FULL-SCREEN THEATER MODE (Works 100% on iPhones, Android, & Desktop) */}
+      {isTheaterOpen && (
+        <div className="fixed inset-0 z-50 bg-black flex flex-col justify-between select-none animate-in fade-in duration-200">
+          {/* Theater Top Bar with Close button */}
+          <div className="p-4 sm:p-6 z-20 flex items-center justify-between bg-gradient-to-b from-black/90 to-transparent">
+            <div className="flex items-center gap-2 font-mono text-xs text-zinc-400">
+              <span className="text-white font-bold">{currentScene.timecode}</span>
+              <span>•</span>
+              <span>SCENE 0{currentScene.id} / 0{SCENES.length}</span>
+            </div>
+
+            <button
+              onClick={() => {
+                playClick();
+                setIsTheaterOpen(false);
+              }}
+              className="px-4 py-2 rounded-full bg-white/15 hover:bg-white/25 border border-white/20 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-xl active:scale-95"
+            >
+              <X className="w-4 h-4" />
+              <span>Close</span>
+            </button>
+          </div>
+
+          {/* Full Screen Image Presentation with Ken Burns effect */}
+          <div className="relative flex-1 w-full h-full flex items-center justify-center overflow-hidden">
+            {SCENES.map((scene, idx) => (
+              <div
+                key={scene.id}
+                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                  currentSceneIdx === idx ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'
+                }`}
+              >
+                <Image
+                  src={scene.image}
+                  alt={scene.title}
+                  fill
+                  priority
+                  className={`object-contain ${
+                    currentSceneIdx === idx && isPlaying
+                      ? 'scale-105 transition-transform duration-[4500ms] ease-out'
+                      : 'scale-100'
+                  }`}
+                />
+              </div>
+            ))}
+
+            {/* Quick Next / Prev Touch Arrows */}
+            <button
+              onClick={() => handleNextScene((currentSceneIdx - 1 + SCENES.length) % SCENES.length)}
+              className="absolute left-3 sm:left-6 z-20 p-3 rounded-full bg-black/60 border border-white/20 text-white hover:bg-white hover:text-black transition-all"
+              aria-label="Previous Scene"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => handleNextScene((currentSceneIdx + 1) % SCENES.length)}
+              className="absolute right-3 sm:right-6 z-20 p-3 rounded-full bg-black/60 border border-white/20 text-white hover:bg-white hover:text-black transition-all"
+              aria-label="Next Scene"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Theater Bottom Bar */}
+          <div className="p-4 sm:p-6 z-20 bg-gradient-to-t from-black via-black/80 to-transparent space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+              <div>
+                <h3 className="text-lg sm:text-2xl font-black uppercase text-white font-display">
+                  {currentScene.title}
+                </h3>
+                <p className="text-xs text-zinc-300 font-sans mt-0.5">
+                  {currentScene.garment} • {currentScene.subtitle}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleTogglePlay}
+                  className="px-4 py-2 rounded-full bg-white/15 border border-white/20 text-white font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-1.5"
+                >
+                  {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                  <span>{isPlaying ? 'Pause' : 'Play'}</span>
+                </button>
+
+                <Link
+                  href={`/product/${currentScene.productSlug}`}
+                  onClick={() => {
+                    playClick();
+                    setIsTheaterOpen(false);
+                  }}
+                  className="px-5 py-2 rounded-full bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 hover:bg-zinc-200 transition-colors shadow-xl"
+                >
+                  <span>Inspect Piece</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            </div>
+
+            {/* Time progress bar */}
+            <div className="w-full h-1 bg-white/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-white transition-all duration-100 ease-linear"
+                style={{
+                  width: `${((currentSceneIdx * 100) + progress) / SCENES.length}%`,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
