@@ -197,11 +197,13 @@ export default function AdminPage() {
   const [isUploadingLook, setIsUploadingLook] = useState(false);
   const [isUploadingNewProductImage, setIsUploadingNewProductImage] = useState(false);
 
-  // Helper to upload image file from device to /api/upload
-  const uploadImageFile = async (file: File, folder: 'lookbook' | 'products' = 'products'): Promise<string | null> => {
+    // Upload single or multiple images directly from camera roll
+  const uploadImageFiles = async (files: FileList | File[], folder: 'lookbook' | 'products' = 'products'): Promise<string[]> => {
     try {
       const formData = new FormData();
-      formData.append('file', file);
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+      }
       formData.append('folder', folder);
 
       const res = await fetch('/api/upload', {
@@ -210,60 +212,70 @@ export default function AdminPage() {
       });
 
       const data = await res.json();
-      if (res.ok && data.success && data.url) {
-        return data.url;
+      if (res.ok && data.success && Array.isArray(data.urls) && data.urls.length > 0) {
+        return data.urls;
+      } else if (res.ok && data.success && data.url) {
+        return [data.url];
       } else {
-        setNotification({ type: 'error', message: data.message || 'Image upload failed.' });
-        return null;
+        setNotification({ type: 'error', message: data.message || 'Camera roll upload failed.' });
+        return [];
       }
     } catch (err: any) {
       console.error('Upload failed:', err);
-      setNotification({ type: 'error', message: 'Network error uploading file.' });
-      return null;
+      setNotification({ type: 'error', message: 'Network error uploading photos.' });
+      return [];
     }
   };
 
   const handleLookFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     setIsUploadingLook(true);
-    const url = await uploadImageFile(file, 'lookbook');
+    const urls = await uploadImageFiles(files, 'lookbook');
     setIsUploadingLook(false);
-    if (url) {
-      setNewLook({ ...newLook, image: url });
-      setNotification({ type: 'success', message: 'Model photo uploaded successfully from device!' });
+    if (urls.length > 0) {
+      setNewLook((prev) => ({ ...prev, image: urls[0] }));
+      setNotification({ type: 'success', message: 'Photo attached from camera roll!' });
     }
     e.target.value = '';
   };
 
   const handleMockupFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!editingProduct) return;
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     setIsUploadingMockup(true);
-    const url = await uploadImageFile(file, 'products');
+    const urls = await uploadImageFiles(files, 'products');
     setIsUploadingMockup(false);
-    if (url) {
-      const updated = [...(editingProduct.images || []), url];
-      setEditingProduct({ ...editingProduct, images: updated });
-      setNotification({ type: 'success', message: 'Mockup image uploaded from device!' });
+    if (urls.length > 0) {
+      setEditingProduct((prev) => prev ? ({ ...prev, images: [...(prev.images || []), ...urls] }) : null);
+      setNotification({ type: 'success', message: `${urls.length} photo(s) added from camera roll!` });
     }
     e.target.value = '';
   };
 
   const handleNewProductFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     setIsUploadingNewProductImage(true);
-    const url = await uploadImageFile(file, 'products');
+    const urls = await uploadImageFiles(files, 'products');
     setIsUploadingNewProductImage(false);
-    if (url) {
-      const current = newProductForm.images.filter(Boolean);
-      setNewProductForm({ ...newProductForm, images: [...current, url] });
-      setNotification({ type: 'success', message: 'Product photo uploaded from device!' });
+    if (urls.length > 0) {
+      setNewProductForm((prev) => {
+        const current = prev.images.filter(Boolean);
+        const updated = [...current, ...urls];
+        return {
+          ...prev,
+          images: updated,
+          colors: prev.colors.map((c, i) => i === 0 ? { ...c, images: [updated[0]] } : c),
+        };
+      });
+      setNotification({ type: 'success', message: `${urls.length} photo(s) added from camera roll!` });
     }
     e.target.value = '';
   };
+
+
 
   const shirtMockupPresets = [
     { label: 'White / Red Cross', path: '/products/shirts/IMG_4266.PNG', hex: '#FFFFFF' },
@@ -470,7 +482,7 @@ export default function AdminPage() {
     isNew: true,
     isFeatured: true,
     isSoldOut: false,
-    images: ['/products/shirts/IMG_4266.PNG'],
+    images: [] as string[],
     colors: [
       { name: 'Onyx Black', hex: '#111113', modelHex: '#18181b', images: ['/products/shirts/IMG_4266.PNG'] },
     ],
@@ -1683,61 +1695,31 @@ export default function AdminPage() {
                   })}
                 </div>
 
-                {/* Add new mockup image */}
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Enter mockup image path or URL (e.g. /products/shirts/IMG_4266.PNG)"
-                    value={newMockupUrl}
-                    onChange={(e) => setNewMockupUrl(e.target.value)}
-                    className="flex-1 h-10 px-3 rounded-xl bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white placeholder-zinc-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!newMockupUrl.trim()) return;
-                      const updated = [...(editingProduct.images || []), newMockupUrl.trim()];
-                      setEditingProduct({ ...editingProduct, images: updated });
-                      setNewMockupUrl('');
-                    }}
-                    className="h-10 px-4 rounded-xl bg-black text-white dark:bg-white dark:text-black text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shrink-0"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Add Mockup</span>
-                  </button>
-                </div>
-
-                {/* Quick Add Presets */}
-                <div className="space-y-1.5 pt-1">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">
-                    Quick Preset Cutouts from Atelier Assets:
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(editingProduct.category === 'accessories' ? capMockupPresets : shirtMockupPresets).map((preset) => {
-                      const alreadyAdded = (editingProduct.images || []).includes(preset.path);
-                      return (
-                        <button
-                          key={preset.path}
-                          type="button"
-                          onClick={() => {
-                            if (alreadyAdded) return;
-                            const updated = [...(editingProduct.images || []), preset.path];
-                            setEditingProduct({ ...editingProduct, images: updated });
-                          }}
-                          disabled={alreadyAdded}
-                          className={`text-[11px] px-2.5 py-1 rounded-lg border font-mono transition-all flex items-center gap-1.5 ${
-                            alreadyAdded
-                              ? 'opacity-40 border-black/5 dark:border-white/5 cursor-not-allowed text-zinc-500'
-                              : 'border-black/15 dark:border-white/15 bg-white dark:bg-zinc-800 hover:border-black dark:hover:border-white text-zinc-800 dark:text-zinc-200'
-                          }`}
-                        >
-                          <span className="w-2.5 h-2.5 rounded-full border border-black/20" style={{ backgroundColor: preset.hex }} />
-                          <span>{preset.label}</span>
-                          {!alreadyAdded && <Plus className="w-3 h-3 text-zinc-400" />}
-                        </button>
-                      );
-                    })}
-                  </div>
+                {/* Upload straight from camera roll */}
+                <div className="pt-1">
+                  <label className="cursor-pointer w-full h-14 rounded-2xl border-2 border-dashed border-emerald-500/40 hover:border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10 flex items-center justify-center gap-3 transition-all">
+                    {isUploadingMockup ? (
+                      <RefreshCw className="w-5 h-5 text-emerald-500 animate-spin" />
+                    ) : (
+                      <Camera className="w-5 h-5 text-emerald-500" />
+                    )}
+                    <div className="text-left">
+                      <span className="text-xs font-bold uppercase tracking-wider text-zinc-950 dark:text-white block">
+                        {isUploadingMockup ? 'Uploading from Camera Roll...' : '+ Add Photo(s) from Camera Roll'}
+                      </span>
+                      <span className="text-[10px] text-zinc-500 font-mono block">
+                        Select mockups & packshots straight from your camera roll
+                      </span>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={handleMockupFileUpload}
+                      disabled={isUploadingMockup}
+                    />
+                  </label>
                 </div>
               </div>
 
@@ -2056,91 +2038,108 @@ export default function AdminPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider font-mono text-zinc-600 dark:text-zinc-400">
-                  Available Sizes
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {['ONE SIZE', 'S', 'M', 'L', 'XL', 'XXL'].map((sz) => {
-                    const isSelected = newProductForm.sizes.includes(sz);
-                    return (
-                      <button
-                        type="button"
-                        key={sz}
-                        onClick={() => {
-                          if (isSelected) {
-                            setNewProductForm({
-                              ...newProductForm,
-                              sizes: newProductForm.sizes.filter((s) => s !== sz),
-                            });
-                          } else {
-                            setNewProductForm({
-                              ...newProductForm,
-                              sizes: [...newProductForm.sizes, sz],
-                            });
-                          }
-                        }}
-                        className={`h-9 px-3 rounded-lg text-xs font-mono font-semibold transition-all ${
-                          isSelected
-                            ? 'bg-black text-white dark:bg-white dark:text-black border border-black dark:border-white'
-                            : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-500 border border-black/10 dark:border-white/10'
-                        }`}
-                      >
-                        {sz}
-                      </button>
-                    );
-                  })}
+              {/* Product Photos straight from Camera Roll */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs uppercase tracking-wider font-mono text-zinc-600 dark:text-zinc-400 font-bold">
+                    Product Photos (From Camera Roll) *
+                  </label>
+                  <span className="text-[11px] font-mono text-zinc-500">
+                    {newProductForm.images.length} photo(s) attached
+                  </span>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider font-mono text-zinc-600 dark:text-zinc-400">
-                  Product Image URLs / Paths
-                </label>
-                <div className="space-y-2">
-                  {newProductForm.images.map((img, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <input
-                        type="text"
-                        value={img}
-                        onChange={(e) => {
-                          const updated = [...newProductForm.images];
-                          updated[idx] = e.target.value;
-                          setNewProductForm({ ...newProductForm, images: updated });
-                        }}
-                        className="flex-1 h-10 px-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
-                        placeholder="/products/shirts/IMG_4266.PNG"
-                      />
-                      {newProductForm.images.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setNewProductForm({
-                              ...newProductForm,
-                              images: newProductForm.images.filter((_, i) => i !== idx),
-                            });
-                          }}
-                          className="w-10 h-10 rounded-xl border border-red-500/20 text-red-500 hover:bg-red-500/10 flex items-center justify-center"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      )}
+                {newProductForm.images.length === 0 ? (
+                  <label className="cursor-pointer flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-emerald-500/40 hover:border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10 text-center transition-all">
+                    {isUploadingNewProductImage ? (
+                      <RefreshCw className="w-10 h-10 text-emerald-500 animate-spin mb-2" />
+                    ) : (
+                      <Camera className="w-10 h-10 text-emerald-500 mb-2" />
+                    )}
+                    <span className="text-sm font-bold uppercase tracking-wider text-zinc-950 dark:text-white">
+                      {isUploadingNewProductImage ? 'Uploading Photos...' : 'Upload Photos from Camera Roll'}
+                    </span>
+                    <span className="text-xs text-zinc-500 mt-1 font-mono">
+                      Tap to select packshots or mockups straight from your device
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={handleNewProductFileUpload}
+                      disabled={isUploadingNewProductImage}
+                    />
+                  </label>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                      {newProductForm.images.map((img, idx) => {
+                        const isCover = idx === 0;
+                        return (
+                          <div
+                            key={idx}
+                            className={`group relative aspect-[4/5] rounded-xl overflow-hidden border p-1 bg-white dark:bg-black/60 transition-all ${
+                              isCover ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-black/10 dark:border-white/10'
+                            }`}
+                          >
+                            <div className="relative w-full h-full">
+                              <Image
+                                src={img}
+                                alt=""
+                                fill
+                                className={img.toLowerCase().endsWith('.png') ? 'object-contain p-1' : 'object-cover'}
+                              />
+                            </div>
+                            {isCover && (
+                              <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-emerald-500 text-black text-[9px] font-mono font-bold uppercase">
+                                Cover
+                              </span>
+                            )}
+                            <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-1">
+                              {!isCover && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newImgs = [img, ...newProductForm.images.filter((_, i) => i !== idx)];
+                                    setNewProductForm({ ...newProductForm, images: newImgs });
+                                  }}
+                                  className="px-2 py-1 rounded bg-white text-black text-[9px] font-bold uppercase tracking-wider shadow"
+                                >
+                                  Make Cover
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newImgs = newProductForm.images.filter((_, i) => i !== idx);
+                                  setNewProductForm({ ...newProductForm, images: newImgs });
+                                }}
+                                className="p-1.5 rounded-lg bg-rose-500 text-white shadow hover:bg-rose-600 transition-colors"
+                                title="Remove photo"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setNewProductForm({
-                        ...newProductForm,
-                        images: [...newProductForm.images, ''],
-                      });
-                    }}
-                    className="text-xs font-mono text-zinc-500 hover:text-black dark:hover:text-white flex items-center gap-1.5 underline underline-offset-4"
-                  >
-                    <Plus className="w-3 h-3" />
-                    <span>Add Another Image URL</span>
-                  </button>
-                </div>
+
+                    <label className="cursor-pointer h-10 px-4 rounded-xl border border-black/15 dark:border-white/15 hover:border-black dark:hover:border-white bg-white dark:bg-zinc-900 text-xs font-semibold uppercase tracking-wider text-zinc-800 dark:text-zinc-200 flex items-center justify-center gap-2 transition-all">
+                      <Camera className="w-3.5 h-3.5 text-emerald-500" />
+                      <span>+ Add More Photos from Camera Roll</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        onChange={handleNewProductFileUpload}
+                        disabled={isUploadingNewProductImage}
+                      />
+                    </label>
+                  </div>
+                )}
               </div>
 
               <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900/60 border border-black/10 dark:border-white/10 flex items-center justify-between">
@@ -2245,57 +2244,59 @@ export default function AdminPage() {
                 />
               </div>
 
-              {/* Image URL or Path */}
+              {/* Photo Upload Straight from Camera Roll */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-                  Model Photo Path / URL *
+                <label className="text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 block">
+                  Model Photo (From Camera Roll) *
                 </label>
-                <input
-                  type="text"
-                  required
-                  value={newLook.image}
-                  onChange={(e) => setNewLook({ ...newLook, image: e.target.value })}
-                  placeholder="e.g. /campaign/models/IMG_4298.jpg or https://..."
-                  className="w-full h-11 px-4 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white focus:outline-none focus:border-black dark:focus:border-white"
-                />
 
-                {/* Quick Select Preset Campaign Models */}
-                <div className="space-y-1.5 pt-2">
-                  <span className="text-[11px] text-zinc-500 font-sans">Or tap a studio model photo from your shoot:</span>
-                  <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
-                    {[
-                      { label: 'IMG_4298', path: '/campaign/models/IMG_4298.jpg' },
-                      { label: 'IMG_4372', path: '/campaign/models/IMG_4372.jpg' },
-                      { label: 'IMG_4338', path: '/campaign/models/IMG_4338.jpg' },
-                      { label: 'IMG_4368', path: '/campaign/models/IMG_4368.jpg' },
-                      { label: 'IMG_4330', path: '/campaign/models/IMG_4330.jpg' },
-                      { label: 'IMG_4292', path: '/campaign/models/IMG_4292.jpg' },
-                      { label: 'Beanie Street', path: '/products/caps/xsign-white-beanie-street-look.jpg' },
-                      { label: 'IMG_4472', path: '/campaign/models/IMG_4472.jpg' },
-                      { label: 'IMG_4379', path: '/campaign/models/IMG_4379.jpg' },
-                      { label: 'IMG_4394', path: '/campaign/models/IMG_4394.jpg' },
-                      { label: 'IMG_4397', path: '/campaign/models/IMG_4397.jpg' },
-                      { label: 'IMG_4387', path: '/campaign/models/IMG_4387.jpg' },
-                      { label: 'IMG_4295', path: '/campaign/models/IMG_4295.jpg' },
-                      { label: 'IMG_4348', path: '/campaign/models/IMG_4348.jpg' },
-                      { label: 'IMG_4323', path: '/campaign/models/IMG_4323.jpg' },
-                    ].map((preset) => (
-                      <button
-                        key={preset.path}
-                        type="button"
-                        onClick={() => setNewLook({ ...newLook, image: preset.path })}
-                        className={`relative w-14 h-16 rounded-lg overflow-hidden shrink-0 border transition-all ${
-                          newLook.image === preset.path
-                            ? 'border-black dark:border-white ring-2 ring-black dark:ring-white'
-                            : 'border-black/10 dark:border-white/10 opacity-70 hover:opacity-100'
-                        }`}
-                        title={preset.label}
-                      >
-                        <Image src={preset.path} alt="" fill className="object-cover" />
-                      </button>
-                    ))}
+                {!newLook.image ? (
+                  <label className="cursor-pointer flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-emerald-500/40 hover:border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10 text-center transition-all">
+                    {isUploadingLook ? (
+                      <RefreshCw className="w-10 h-10 text-emerald-500 animate-spin mb-2" />
+                    ) : (
+                      <Camera className="w-10 h-10 text-emerald-500 mb-2" />
+                    )}
+                    <span className="text-sm font-bold uppercase tracking-wider text-zinc-950 dark:text-white">
+                      {isUploadingLook ? 'Uploading from Camera Roll...' : 'Choose Photo from Camera Roll'}
+                    </span>
+                    <span className="text-xs text-zinc-500 mt-1 font-mono">
+                      Tap to select directly from your phone gallery or device
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleLookFileUpload}
+                      disabled={isUploadingLook}
+                    />
+                  </label>
+                ) : (
+                  <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="relative w-16 h-20 rounded-xl overflow-hidden bg-black shrink-0 border border-white/10 shadow-sm">
+                        <Image src={newLook.image} alt="Preview" fill className="object-cover" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold uppercase">
+                          <Check className="w-3.5 h-3.5" /> Photo Attached from Camera Roll
+                        </span>
+                        <p className="text-xs text-zinc-500 font-mono truncate">{newLook.image.split('/').pop()}</p>
+                      </div>
+                    </div>
+                    <label className="cursor-pointer shrink-0 h-9 px-3.5 rounded-xl border border-black/15 dark:border-white/15 hover:border-black dark:hover:border-white text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-200 transition-all flex items-center gap-1.5">
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>Change Photo</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleLookFileUpload}
+                        disabled={isUploadingLook}
+                      />
+                    </label>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Tagged Product to Shop & Orientation */}
