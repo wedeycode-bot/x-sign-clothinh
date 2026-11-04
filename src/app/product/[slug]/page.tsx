@@ -320,23 +320,6 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
                   </button>
                 )}
               </div>
-
-              {/* Secondary WhatsApp Direct Order / Waitlist Button */}
-              <a
-                href={
-                  isSoldOut
-                    ? `https://wa.me/233530813362?text=${encodeURIComponent(
-                        `Hello X-SIGN Atelier, I would like to join the waitlist for when "${product.title}" (${selectedColor.name}, Size: ${selectedSize}) is restocked.`
-                      )}`
-                    : whatsAppDirectUrl
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full h-12 rounded border border-black/15 dark:border-white/15 hover:border-black/30 dark:hover:border-white/30 bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.05] dark:hover:bg-white/[0.05] text-zinc-800 dark:text-zinc-200 font-sans font-medium text-xs tracking-wider uppercase transition-all flex items-center justify-center gap-2"
-              >
-                <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
-                <span>{isSoldOut ? 'Join Restock Waitlist via WhatsApp' : 'Order via WhatsApp'}</span>
-              </a>
             </div>
 
             {/* Atelier Technical Specs Table */}

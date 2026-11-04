@@ -176,16 +176,6 @@ export const CartDrawer: React.FC = () => {
               <ArrowRight className="w-4 h-4" />
             </Link>
 
-            <a
-              href={getWhatsAppCartUrl(cart, subtotalGHS)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider text-xs font-mono transition-all"
-            >
-              <WhatsAppIcon className="w-4 h-4 text-[#25D366]" />
-              <span>Instant Pay / Order via WhatsApp</span>
-            </a>
-
             <div className="text-center">
               <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">
                 Ghana Express Dispatch • DHL Worldwide • Secure Encryption
