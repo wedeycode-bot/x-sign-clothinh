@@ -48,8 +48,11 @@ export const SearchModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/60 dark:bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+      {/* Click backdrop anywhere to dismiss */}
+      <div className="absolute inset-0 cursor-pointer" onClick={closeSearch} />
+
       <div
-        className="w-full max-w-3xl bg-white dark:bg-[#0e0f14] border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] transition-colors duration-200"
+        className="relative z-10 w-full max-w-3xl bg-white dark:bg-[#0e0f14] border border-black/10 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] transition-colors duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header & Input */}
@@ -60,22 +63,25 @@ export const SearchModal: React.FC = () => {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search gothic tees, beanies, glitter gold, raw cotton..."
+            placeholder="Search collection, tees, beanies, caps..."
             className="w-full bg-transparent text-base sm:text-lg text-zinc-950 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none font-sans"
           />
           {query && (
             <button
               onClick={() => setQuery('')}
-              className="p-1 rounded-full text-zinc-500 hover:text-black dark:hover:text-white"
+              className="p-1 rounded-full text-zinc-400 hover:text-black dark:hover:text-white transition-colors"
+              title="Clear text"
             >
               <X className="w-4 h-4" />
             </button>
           )}
           <button
             onClick={closeSearch}
-            className="px-3 py-1.5 rounded-lg border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+            aria-label="Close search"
+            className="w-8 h-8 rounded-full border border-black/10 dark:border-white/10 flex items-center justify-center text-zinc-500 hover:text-black dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-colors shrink-0"
+            title="Close"
           >
-            ESC
+            <X className="w-4 h-4" />
           </button>
         </div>
 
