@@ -160,12 +160,8 @@ export const CampaignFilmPlayer: React.FC = () => {
         {/* Top Video Overlay Bar */}
         <div className="absolute top-5 left-5 right-5 z-30 flex items-center justify-between text-xs font-mono">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-black/75 backdrop-blur-md border border-white/15 text-white">
-              <span className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-red-500 animate-pulse' : 'bg-zinc-500'}`} />
-              <span>REC // 24 FPS</span>
-            </div>
-            <span className="hidden sm:inline-block px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-zinc-300">
-              35MM STREET NOIR
+            <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-zinc-300 font-sans uppercase tracking-wider text-[11px]">
+              X-SIGN CAMPAIGN
             </span>
           </div>
 
