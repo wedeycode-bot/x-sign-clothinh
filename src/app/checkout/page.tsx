@@ -456,11 +456,6 @@ export default function CheckoutPage() {
                     <span className="text-white">{formatPrice(subtotalGHS)}</span>
                   </div>
 
-                  <div className="flex justify-between text-zinc-400">
-                    <span>Delivery</span>
-                    <span className="text-emerald-400 font-semibold">FREE</span>
-                  </div>
-
                   <div className="border-t border-white/10 pt-3 flex justify-between text-base font-bold text-white">
                     <span>Total ({currency})</span>
                     <span className="text-white">{formatPrice(grandTotalGHS)}</span>

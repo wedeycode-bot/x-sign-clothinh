@@ -116,10 +116,6 @@ export async function sendOrderNotificationEmails(order: OrderData): Promise<{
             <span>Subtotal:</span>
             <span>GH₵ ${order.subtotalGHS}</span>
           </div>
-          <div style="display: flex; justify-content: space-between; font-size: 13px; color: #a1a1aa; margin-bottom: 8px;">
-            <span>Delivery:</span>
-            <span>${order.deliveryFeeGHS === 0 ? 'FREE' : `GH₵ ${order.deliveryFeeGHS}`}</span>
-          </div>
           <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: 800; color: #ffffff; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.1);">
             <span>TOTAL:</span>
             <span style="color: #10b981;">GH₵ ${order.totalGHS}</span>
@@ -183,10 +179,6 @@ export async function sendOrderNotificationEmails(order: OrderData): Promise<{
             <div style="display: flex; justify-content: space-between; font-size: 13px; color: #a1a1aa; margin-bottom: 6px;">
               <span>Subtotal:</span>
               <span>GH₵ ${order.subtotalGHS}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; font-size: 13px; color: #a1a1aa; margin-bottom: 8px;">
-              <span>Delivery (${order.deliveryCity}):</span>
-              <span>${order.deliveryFeeGHS === 0 ? 'FREE' : `GH₵ ${order.deliveryFeeGHS}`}</span>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: 800; color: #ffffff; padding-top: 8px; border-top: 1px dashed rgba(255,255,255,0.1);">
               <span>TOTAL:</span>

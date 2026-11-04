@@ -62,10 +62,8 @@ ${address.digitalAddress ? `• *Ghana Post GPS:* ${address.digitalAddress}\n` :
 ${itemsText}
 
 ━━━━━━━━━━━━━━━━━━━━
-💰 *PAYMENT BREAKDOWN:*
-• *Subtotal:* GH₵ ${subtotalGHS.toLocaleString()}
-• *Delivery:* FREE (Complimentary)
-• *TOTAL PAYABLE:* *GH₵ ${grandTotalGHS.toLocaleString()}*
+💰 *PAYMENT:*
+• *Total Payable:* *GH₵ ${grandTotalGHS.toLocaleString()}*
 • *Payment Channel:* WhatsApp Direct Pay
 ━━━━━━━━━━━━━━━━━━━━
 
