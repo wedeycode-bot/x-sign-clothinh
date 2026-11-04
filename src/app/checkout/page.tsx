@@ -232,12 +232,11 @@ export default function CheckoutPage() {
         {/* Header */}
         <div className="border-b border-white/5 pb-8 mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 uppercase tracking-widest mb-1">
-              <Lock className="w-3.5 h-3.5" />
-              <span>WHATSAPP ORDER & PAYMENT DISPATCH</span>
-            </div>
+            <span className="text-xs uppercase tracking-[0.2em] text-zinc-400 mb-1 block font-sans">
+              X-SIGN ATELIER
+            </span>
             <h1 className="text-3xl sm:text-5xl font-black uppercase text-white font-sans tracking-tight">
-              SECURE CHECKOUT
+              CHECKOUT
             </h1>
           </div>
           <Link href="/shop" className="text-xs font-mono text-zinc-400 hover:text-white transition-colors">
@@ -264,17 +263,16 @@ export default function CheckoutPage() {
               {/* Delivery Destination Selector */}
               <div className="p-6 rounded-2xl bg-[#0c0d12] border border-white/10 space-y-6">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                    <Truck className="w-4 h-4 text-amber-400" />
-                    <span>01. DELIVERY DESTINATION</span>
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
+                    Delivery Details
                   </h3>
 
-                  <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono">
+                  <div className="flex items-center gap-1.5 p-1 rounded-full bg-white/5 border border-white/10 text-xs">
                     <button
                       type="button"
                       onClick={() => setIsInternational(false)}
                       className={`px-3 py-1 rounded-full transition-all ${
-                        !isInternational ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white'
+                        !isInternational ? 'bg-white text-black font-semibold' : 'text-zinc-400 hover:text-white'
                       }`}
                     >
                       Ghana
@@ -283,62 +281,62 @@ export default function CheckoutPage() {
                       type="button"
                       onClick={() => setIsInternational(true)}
                       className={`px-3 py-1 rounded-full transition-all ${
-                        isInternational ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white'
+                        isInternational ? 'bg-white text-black font-semibold' : 'text-zinc-400 hover:text-white'
                       }`}
                     >
-                      Worldwide (DHL)
+                      Worldwide
                     </button>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-sans">
                   <div className="space-y-1 sm:col-span-2">
-                    <label className="text-zinc-400 font-mono text-[11px] uppercase">Full Name *</label>
+                    <label className="text-zinc-400 text-[11px] uppercase tracking-wider">Full Name *</label>
                     <input
                       type="text"
                       required
                       value={address.fullName}
                       onChange={(e) => setAddress({ ...address, fullName: e.target.value })}
                       placeholder="e.g. Kwame Mensah"
-                      className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-zinc-600 focus:outline-none focus:border-white/30"
+                      className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-600 focus:outline-none focus:border-white/30"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-zinc-400 font-mono text-[11px] uppercase">Email Address *</label>
+                    <label className="text-zinc-400 text-[11px] uppercase tracking-wider">Email Address *</label>
                     <input
                       type="email"
                       required
                       value={address.email}
                       onChange={(e) => setAddress({ ...address, email: e.target.value })}
-                      placeholder="name@domain.com"
-                      className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-zinc-600 focus:outline-none focus:border-white/30"
+                      placeholder="name@email.com"
+                      className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-600 focus:outline-none focus:border-white/30"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-zinc-400 font-mono text-[11px] uppercase">Mobile Phone Number *</label>
+                    <label className="text-zinc-400 text-[11px] uppercase tracking-wider">Phone / WhatsApp *</label>
                     <input
                       type="tel"
                       required
                       value={address.phone}
                       onChange={(e) => setAddress({ ...address, phone: e.target.value })}
-                      placeholder="e.g. +233 24 123 4567"
-                      className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-zinc-600 focus:outline-none focus:border-white/30"
+                      placeholder="e.g. 024 123 4567"
+                      className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-600 focus:outline-none focus:border-white/30"
                     />
                   </div>
 
                   {!isInternational ? (
                     <>
                       <div className="space-y-1">
-                        <label className="text-zinc-400 font-mono text-[11px] uppercase">Ghana Region *</label>
+                        <label className="text-zinc-400 text-[11px] uppercase tracking-wider">Region *</label>
                         <select
                           value={selectedRegion}
                           onChange={(e) => {
                             setSelectedRegion(e.target.value);
                             setAddress({ ...address, region: e.target.value });
                           }}
-                          className="w-full p-3 rounded-lg bg-[#14151b] border border-white/10 text-white focus:outline-none"
+                          className="w-full p-3 rounded-xl bg-[#14151b] border border-white/10 text-white focus:outline-none"
                         >
                           {ghanaRegions.map((r) => (
                             <option key={r} value={r}>
@@ -349,7 +347,7 @@ export default function CheckoutPage() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-zinc-400 font-mono text-[11px] uppercase">
+                        <label className="text-zinc-400 text-[11px] uppercase tracking-wider">
                           Ghana Post Digital Address
                         </label>
                         <input
@@ -357,95 +355,80 @@ export default function CheckoutPage() {
                           value={address.digitalAddress}
                           onChange={(e) => setAddress({ ...address, digitalAddress: e.target.value })}
                           placeholder="e.g. GA-183-9024"
-                          className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-zinc-600 focus:outline-none focus:border-white/30 font-mono uppercase"
+                          className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-600 focus:outline-none focus:border-white/30 uppercase font-mono"
                         />
                       </div>
                     </>
                   ) : (
                     <>
                       <div className="space-y-1">
-                        <label className="text-zinc-400 font-mono text-[11px] uppercase">Country *</label>
+                        <label className="text-zinc-400 text-[11px] uppercase tracking-wider">Country *</label>
                         <input
                           type="text"
                           required
                           value={address.country}
                           onChange={(e) => setAddress({ ...address, country: e.target.value })}
-                          placeholder="United Kingdom, United States, France..."
-                          className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-zinc-600 focus:outline-none focus:border-white/30"
+                          placeholder="United Kingdom, United States, Canada..."
+                          className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-600 focus:outline-none focus:border-white/30"
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-zinc-400 font-mono text-[11px] uppercase">Postal / ZIP Code</label>
+                        <label className="text-zinc-400 text-[11px] uppercase tracking-wider">Postal / ZIP Code</label>
                         <input
                           type="text"
                           placeholder="SW1A 1AA, 10001..."
-                          className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-zinc-600 focus:outline-none focus:border-white/30 font-mono"
+                          className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-600 focus:outline-none focus:border-white/30 font-mono"
                         />
                       </div>
                     </>
                   )}
 
                   <div className="space-y-1 sm:col-span-2">
-                    <label className="text-zinc-400 font-mono text-[11px] uppercase">
-                      Street Address & Landmarks *
+                    <label className="text-zinc-400 text-[11px] uppercase tracking-wider">
+                      Street Address & Landmark *
                     </label>
                     <input
                       type="text"
                       required
                       value={address.streetAddress}
                       onChange={(e) => setAddress({ ...address, streetAddress: e.target.value })}
-                      placeholder="e.g. 14 Ring Road Central, Near Shell Station, Osu"
-                      className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-zinc-600 focus:outline-none focus:border-white/30"
+                      placeholder="e.g. Ring Road Central, near Shell station, Osu"
+                      className="w-full p-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-600 focus:outline-none focus:border-white/30"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Payment Method - WhatsApp Pay Only */}
-              <div className="p-6 rounded-2xl bg-[#0c0d12] border border-emerald-500/30 space-y-5">
+              {/* Payment Section - Clean Luxury Streetwear */}
+              <div className="p-6 rounded-2xl bg-[#0c0d12] border border-white/10 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-white flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                    <span>02. PAYMENT METHOD</span>
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
+                    Payment Method
                   </h3>
-                  <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse" />
-                    DIRECT WHATSAPP ORDER DESK
+                  <span className="text-xs text-zinc-400">
+                    MoMo & WhatsApp
                   </span>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-black/40 to-black/60 border border-emerald-500/30 space-y-4">
-                  <div className="flex items-start gap-3.5">
-                    <div className="p-2.5 rounded-xl bg-[#25D366] text-black shrink-0 mt-0.5">
-                      <WhatsAppIcon className="w-6 h-6 text-black" />
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-mono text-sm font-bold uppercase text-white tracking-wide">
-                          Official WhatsApp Payment Desk
-                        </h4>
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold uppercase">
-                          Direct Line
-                        </span>
-                      </div>
-                      <p className="text-xs text-zinc-300 font-sans leading-relaxed">
-                        When you submit your order, your full items manifest, sizes, colors, and delivery location will open directly on our official WhatsApp desk (<strong className="text-emerald-400 font-mono">{BRAND_CONFIG.whatsappNumber}</strong>).
-                      </p>
-                    </div>
+                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 flex items-start gap-3.5">
+                  <div className="w-9 h-9 rounded-lg bg-[#25D366]/15 flex items-center justify-center shrink-0 text-[#25D366] mt-0.5">
+                    <WhatsAppIcon className="w-5 h-5 text-[#25D366]" />
                   </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 border-t border-white/5 text-[11px] font-mono text-zinc-300">
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-white/5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                      <span>MTN MoMo, Telecel, AT</span>
-                    </div>
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-white/5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                      <span>Ghana Bank Transfer</span>
-                    </div>
-                    <div className="flex items-center gap-2 p-2 rounded-lg bg-white/5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                      <span>Instant Dispatch Tracking</span>
+                  <div className="space-y-1.5 flex-1">
+                    <p className="text-xs font-semibold text-white">
+                      Confirm on WhatsApp
+                    </p>
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                      When you submit your order, your details will open directly in WhatsApp to finalize payment with MTN MoMo, Telecel Cash, or Bank Transfer.
+                    </p>
+                    <div className="flex items-center gap-2 pt-1 flex-wrap text-[11px] text-zinc-500">
+                      <span>MTN MoMo</span>
+                      <span>•</span>
+                      <span>Telecel Cash</span>
+                      <span>•</span>
+                      <span>Bank Transfer</span>
+                      <span>•</span>
+                      <span>Accra Same-Day Dispatch</span>
                     </div>
                   </div>
                 </div>
@@ -505,21 +488,20 @@ export default function CheckoutPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-4 px-6 rounded-xl font-bold uppercase tracking-wider font-mono text-xs transition-all flex items-center justify-center gap-2 shadow-2xl bg-[#25D366] hover:bg-[#20bd5a] text-black shadow-emerald-500/20 disabled:opacity-50"
+                  className="w-full py-4 px-6 rounded-xl font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 shadow-xl bg-white hover:bg-zinc-200 text-black disabled:opacity-50"
                 >
                   {isSubmitting ? (
-                    <span>Linking to WhatsApp...</span>
+                    <span>Processing Order...</span>
                   ) : (
                     <>
-                      <WhatsAppIcon className="w-4 h-4 text-black" />
-                      <span>Pay via WhatsApp • {formatPrice(grandTotalGHS)}</span>
+                      <span>Complete Order • {formatPrice(grandTotalGHS)}</span>
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
                 </button>
 
-                <p className="text-[10px] font-mono text-zinc-500 text-center leading-relaxed">
-                  Your order is submitted directly to {BRAND_CONFIG.name} sales desk on WhatsApp ({BRAND_CONFIG.whatsappNumber}) for immediate confirmation and delivery dispatch.
+                <p className="text-[11px] text-zinc-500 text-center leading-relaxed font-sans">
+                  Orders are dispatched from Accra with direct WhatsApp tracking.
                 </p>
               </div>
             </div>
