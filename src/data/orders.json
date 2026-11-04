@@ -1,5 +1,38 @@
 [
   {
+    "orderNumber": "ORD-592856",
+    "customerName": "ththr",
+    "customerEmail": "yjt@hmail.com",
+    "customerPhone": "ghr",
+    "deliveryCity": "Accra",
+    "deliveryAddress": "jututi",
+    "notes": "",
+    "items": [
+      {
+        "id": "xsign-beanie-classic",
+        "title": "X-SIGN RIBBED BEANIE (Embroidered Crest)",
+        "size": "ONE SIZE",
+        "colorName": "Pitch Black / White Crest",
+        "quantity": 1,
+        "priceGHS": 149
+      },
+      {
+        "id": "xsign-flex-tee",
+        "title": "X-SIGN FLEX TEE",
+        "size": "S",
+        "colorName": "Onyx Black / Glow in Dark & Reflective",
+        "quantity": 1,
+        "priceGHS": 299
+      }
+    ],
+    "subtotalGHS": 448,
+    "deliveryFeeGHS": 0,
+    "totalGHS": 448,
+    "id": "ord_1793792688659_pmbu",
+    "status": "received",
+    "createdAt": "2026-11-04T11:44:48.659Z"
+  },
+  {
     "orderNumber": "ORD-999733",
     "customerName": "tfyth",
     "customerEmail": "legitimatebeanslittleton123@gmail.com",

@@ -94,11 +94,6 @@ export const EditorialLookbookStrip: React.FC = () => {
             {/* Vignette */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
 
-            {/* Corner look tag */}
-            <div className="absolute top-3 left-3 z-10 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md border border-white/15 font-mono text-[10px] text-zinc-300">
-              LOOK {look.id}
-            </div>
-
             <div className="absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-black/60 backdrop-blur-md border border-white/15 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity">
               <ArrowUpRight className="w-3.5 h-3.5" />
             </div>

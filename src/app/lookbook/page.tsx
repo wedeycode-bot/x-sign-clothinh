@@ -203,12 +203,6 @@ export default function LookbookPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
 
-              {/* Top Tag */}
-              <div className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/10 text-[10px] font-mono text-zinc-300 uppercase">
-                <Camera className="w-3 h-3 text-white" />
-                <span>{item.id.toUpperCase()}</span>
-              </div>
-
               {/* Bottom Details Overlay */}
               <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 flex items-end justify-between gap-4">
                 <div className="space-y-1">
