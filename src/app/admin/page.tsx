@@ -31,6 +31,7 @@ import {
   MapPin,
   Clock,
   Camera,
+  Upload,
   Palette,
 } from 'lucide-react';
 
@@ -191,6 +192,78 @@ export default function AdminPage() {
   const [newColorName, setNewColorName] = useState('');
   const [newColorHex, setNewColorHex] = useState('#000000');
   const [newColorMockup, setNewColorMockup] = useState('');
+
+  const [isUploadingMockup, setIsUploadingMockup] = useState(false);
+  const [isUploadingLook, setIsUploadingLook] = useState(false);
+  const [isUploadingNewProductImage, setIsUploadingNewProductImage] = useState(false);
+
+  // Helper to upload image file from device to /api/upload
+  const uploadImageFile = async (file: File, folder: 'lookbook' | 'products' = 'products'): Promise<string | null> => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', folder);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success && data.url) {
+        return data.url;
+      } else {
+        setNotification({ type: 'error', message: data.message || 'Image upload failed.' });
+        return null;
+      }
+    } catch (err: any) {
+      console.error('Upload failed:', err);
+      setNotification({ type: 'error', message: 'Network error uploading file.' });
+      return null;
+    }
+  };
+
+  const handleLookFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingLook(true);
+    const url = await uploadImageFile(file, 'lookbook');
+    setIsUploadingLook(false);
+    if (url) {
+      setNewLook({ ...newLook, image: url });
+      setNotification({ type: 'success', message: 'Model photo uploaded successfully from device!' });
+    }
+    e.target.value = '';
+  };
+
+  const handleMockupFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!editingProduct) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingMockup(true);
+    const url = await uploadImageFile(file, 'products');
+    setIsUploadingMockup(false);
+    if (url) {
+      const updated = [...(editingProduct.images || []), url];
+      setEditingProduct({ ...editingProduct, images: updated });
+      setNotification({ type: 'success', message: 'Mockup image uploaded from device!' });
+    }
+    e.target.value = '';
+  };
+
+  const handleNewProductFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingNewProductImage(true);
+    const url = await uploadImageFile(file, 'products');
+    setIsUploadingNewProductImage(false);
+    if (url) {
+      const current = newProductForm.images.filter(Boolean);
+      setNewProductForm({ ...newProductForm, images: [...current, url] });
+      setNotification({ type: 'success', message: 'Product photo uploaded from device!' });
+    }
+    e.target.value = '';
+  };
 
   const shirtMockupPresets = [
     { label: 'White / Red Cross', path: '/products/shirts/IMG_4266.PNG', hex: '#FFFFFF' },
