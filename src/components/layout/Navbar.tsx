@@ -85,9 +85,9 @@ export const Navbar: React.FC = () => {
           <Link
             href="/"
             onClick={playClick}
-            className="flex items-center gap-3 group tracking-tighter"
+            className="flex items-center gap-2 sm:gap-3 group tracking-tighter shrink min-w-0"
           >
-            <div className="relative w-7 h-9 sm:w-8 sm:h-10 shrink-0">
+            <div className="relative w-6 h-8 sm:w-8 sm:h-10 shrink-0">
               <Image
                 src={logoSrc}
                 alt={BRAND_CONFIG.name}
@@ -96,8 +96,8 @@ export const Navbar: React.FC = () => {
                 priority
               />
             </div>
-            <div className="flex flex-col">
-              <span className="text-xl sm:text-2xl font-black tracking-[0.25em] text-black dark:text-white uppercase font-display leading-none whitespace-nowrap">
+            <div className="flex flex-col min-w-0">
+              <span className="text-lg sm:text-2xl font-black tracking-[0.15em] sm:tracking-[0.25em] text-black dark:text-white uppercase font-display leading-none whitespace-nowrap">
                 {BRAND_CONFIG.name}
               </span>
               <span className="text-[9px] font-mono tracking-[0.2em] text-zinc-500 dark:text-zinc-400 uppercase mt-0.5 hidden sm:block">
@@ -107,14 +107,14 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Right: Actions */}
-          <div className="flex items-center gap-1.5 sm:gap-3">
-            {/* Theme Toggle Button (Light / Dark) */}
+          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+            {/* Theme Toggle Button (Desktop header, mobile has it in drawer) */}
             <button
               onClick={() => {
                 playClick();
                 toggleTheme();
               }}
-              className="p-2 text-zinc-500 hover:text-black dark:text-zinc-400 dark:hover:text-white transition-colors"
+              className="hidden sm:flex p-2 text-zinc-500 hover:text-black dark:text-zinc-400 dark:hover:text-white transition-colors"
               aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
@@ -134,11 +134,11 @@ export const Navbar: React.FC = () => {
               className="p-2 text-zinc-500 hover:text-black dark:text-zinc-400 dark:hover:text-white transition-colors"
               title="Search Catalog (Cmd+K)"
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-4 h-4 sm:w-4 sm:h-4" />
             </button>
 
-            {/* Currency Selector */}
-            <div className="relative">
+            {/* Currency Selector (Desktop header, mobile has it in drawer) */}
+            <div className="relative hidden sm:block">
               <button
                 onClick={() => setIsCurrencyDropdownOpen(!isCurrencyDropdownOpen)}
                 className="flex items-center gap-1 px-2 py-1 text-xs font-sans font-medium tracking-wider uppercase text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors"

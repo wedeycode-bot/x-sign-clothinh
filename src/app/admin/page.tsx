@@ -753,8 +753,8 @@ export default function AdminPage() {
   // 2. Passcode Gate Screen (Clean, strictly private, zero hints)
   if (!isAuthenticated) {
     return (
-      <div className="min-h-[85vh] flex items-center justify-center px-4 py-16">
-        <div className="w-full max-w-md p-8 sm:p-10 rounded-3xl bg-white dark:bg-[#0c0d12] border border-black/10 dark:border-white/10 shadow-2xl relative overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center px-4 pt-28 pb-16">
+        <div className="w-full max-w-md p-6 sm:p-10 rounded-3xl bg-white dark:bg-[#0c0d12] border border-black/10 dark:border-white/10 shadow-2xl relative overflow-hidden">
           <div className="text-center space-y-3 mb-8">
             <div className="w-12 h-12 mx-auto rounded-2xl bg-black dark:bg-white flex items-center justify-center text-white dark:text-black shadow-lg">
               <ShieldCheck className="w-6 h-6" />
@@ -832,7 +832,7 @@ export default function AdminPage() {
 
   // 3. Authenticated Manager Dashboard
   return (
-    <div className="min-h-screen pb-24 pt-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto font-sans">
+    <div className="min-h-screen pb-24 pt-28 sm:pt-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto font-sans">
       {/* Toast Notification Banner */}
       {notification && (
         <div
@@ -862,11 +862,11 @@ export default function AdminPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto">
           <Link
             href="/shop"
             target="_blank"
-            className="h-10 px-4 rounded-xl border border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30 bg-black/[0.02] dark:bg-white/[0.02] text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white flex items-center gap-2 transition-all"
+            className="flex-1 sm:flex-initial h-10 px-3.5 sm:px-4 rounded-xl border border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30 bg-black/[0.02] dark:bg-white/[0.02] text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white flex items-center justify-center gap-2 transition-all whitespace-nowrap"
           >
             <Eye className="w-3.5 h-3.5" />
             <span>Storefront Preview</span>
@@ -875,7 +875,7 @@ export default function AdminPage() {
 
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="h-10 px-4 rounded-xl bg-black text-white dark:bg-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-md transition-all"
+            className="flex-1 sm:flex-initial h-10 px-3.5 sm:px-4 rounded-xl bg-black text-white dark:bg-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition-all whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
             <span>Add New Product</span>
@@ -884,7 +884,7 @@ export default function AdminPage() {
           <button
             onClick={handleLogout}
             title="Lock terminal and logout"
-            className="h-10 w-10 rounded-xl border border-black/10 dark:border-white/10 hover:border-red-500/30 hover:bg-red-500/10 text-zinc-500 hover:text-red-500 transition-colors flex items-center justify-center"
+            className="h-10 w-10 shrink-0 rounded-xl border border-black/10 dark:border-white/10 hover:border-red-500/30 hover:bg-red-500/10 text-zinc-500 hover:text-red-500 transition-colors flex items-center justify-center"
           >
             <LogOut className="w-4 h-4" />
           </button>
@@ -997,14 +997,14 @@ export default function AdminPage() {
       <div className="flex items-center gap-2 sm:gap-3 border-b border-black/10 dark:border-white/10 pb-4 mb-8 overflow-x-auto no-scrollbar">
         <button
           onClick={() => setActiveTab('inventory')}
-          className={`h-11 px-5 rounded-xl font-sans font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap ${
+          className={`shrink-0 h-11 px-4 sm:px-5 rounded-xl font-sans font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap ${
             activeTab === 'inventory'
               ? 'bg-black text-white dark:bg-white dark:text-black shadow-md'
               : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
           }`}
         >
           <Package className="w-4 h-4" />
-          <span>Catalog & Inventory ({totalItems})</span>
+          <span>Catalog ({totalItems})</span>
         </button>
 
         <button
@@ -1012,14 +1012,14 @@ export default function AdminPage() {
             setActiveTab('orders');
             fetchOrders();
           }}
-          className={`h-11 px-5 rounded-xl font-sans font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap ${
+          className={`shrink-0 h-11 px-4 sm:px-5 rounded-xl font-sans font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap ${
             activeTab === 'orders'
               ? 'bg-black text-white dark:bg-white dark:text-black shadow-md'
               : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
           }`}
         >
           <ShoppingBag className="w-4 h-4" />
-          <span>Customer Orders ({orders.length})</span>
+          <span>Orders ({orders.length})</span>
           {orders.filter((o) => o.status === 'received').length > 0 && (
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           )}
@@ -1030,7 +1030,7 @@ export default function AdminPage() {
             setActiveTab('lookbook');
             fetchLookbook();
           }}
-          className={`h-11 px-5 rounded-xl font-sans font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap ${
+          className={`shrink-0 h-11 px-4 sm:px-5 rounded-xl font-sans font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap ${
             activeTab === 'lookbook'
               ? 'bg-black text-white dark:bg-white dark:text-black shadow-md'
               : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
