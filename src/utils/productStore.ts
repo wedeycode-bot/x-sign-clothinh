@@ -79,7 +79,7 @@ function mapProductToRow(p: Product): any {
 
 export async function getStoredProducts(): Promise<Product[]> {
   // 1. Try fetching from Supabase if configured
-  if (isSupabaseServerConfigured) {
+  if (isSupabaseServerConfigured()) {
     try {
       const supabase = getSupabaseServer();
       if (supabase) {
@@ -139,7 +139,7 @@ export async function updateStoredProduct(
   };
 
   // 1. Update in Supabase if configured
-  if (isSupabaseServerConfigured) {
+  if (isSupabaseServerConfigured()) {
     try {
       const supabase = getSupabaseServer();
       if (supabase) {
@@ -202,7 +202,7 @@ export async function addStoredProduct(newProduct: Product): Promise<Product> {
   };
 
   // 1. Insert into Supabase if configured
-  if (isSupabaseServerConfigured) {
+  if (isSupabaseServerConfigured()) {
     try {
       const supabase = getSupabaseServer();
       if (supabase) {
@@ -239,7 +239,7 @@ export async function deleteStoredProduct(id: string): Promise<boolean> {
   if (!target) return false;
 
   // 1. Delete from Supabase if configured
-  if (isSupabaseServerConfigured) {
+  if (isSupabaseServerConfigured()) {
     try {
       const supabase = getSupabaseServer();
       if (supabase) {

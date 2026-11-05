@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(bytes);
 
     // If Supabase is configured, upload to Supabase Storage bucket
-    if (isSupabaseServerConfigured) {
+    if (isSupabaseServerConfigured()) {
       const supabase = getSupabaseServer();
       if (supabase) {
         const fileExt = file.name.split('.').pop() || 'jpg';

@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const savedUrls: string[] = [];
 
     // 1. Upload to Supabase Storage if configured (Permanent cloud storage for Vercel)
-    if (isSupabaseServerConfigured) {
+    if (isSupabaseServerConfigured()) {
       const supabase = getSupabaseServer();
       if (supabase) {
         for (const file of files) {
