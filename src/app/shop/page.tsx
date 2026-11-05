@@ -21,16 +21,24 @@ function ShopContent() {
   const [selectedSize, setSelectedSize] = useState<string>('all');
   const [onlyInStock, setOnlyInStock] = useState(false);
 
-  const categories: { label: string; value: ProductCategory }[] = [
-    { label: 'ALL PIECES', value: 'all' },
-    { label: 'SHIRTS', value: 't-shirts' },
-    { label: 'JOGGERS', value: 'joggers' },
-    { label: 'SHORTS', value: 'shorts' },
-    { label: 'BOXERS', value: 'boxers' },
-    { label: 'VESTS (SINGLETS)', value: 'vests' },
-    { label: 'SOCKS', value: 'socks' },
-    { label: 'CAPS', value: 'accessories' },
-  ];
+  // Dynamically show only categories that actually have products in the store
+  const categories = useMemo(() => {
+    const presentCategories = new Set(products.map((p) => p.category));
+    const masterOrder: { label: string; value: ProductCategory }[] = [
+      { label: 'ALL PIECES', value: 'all' },
+      { label: 'SHIRTS', value: 't-shirts' },
+      { label: 'CAPS', value: 'accessories' },
+      { label: 'JOGGERS', value: 'joggers' },
+      { label: 'SHORTS', value: 'shorts' },
+      { label: 'BOXERS', value: 'boxers' },
+      { label: 'VESTS (SINGLETS)', value: 'vests' },
+      { label: 'SOCKS', value: 'socks' },
+      { label: 'HOODIES', value: 'hoodies' },
+      { label: 'PANTS', value: 'pants' },
+      { label: 'JEANS', value: 'jeans' },
+    ];
+    return masterOrder.filter((cat) => cat.value === 'all' || presentCategories.has(cat.value));
+  }, [products]);
 
   const sizes = ['all', 'ONE SIZE', 'S', 'M', 'L', 'XL', 'XXL'];
 

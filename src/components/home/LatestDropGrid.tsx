@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useProducts } from '@/context/ProductsContext';
@@ -13,16 +13,23 @@ export const LatestDropGrid: React.FC = () => {
   const { products } = useProducts();
   const [activeCategory, setActiveCategory] = useState<ProductCategory>('all');
 
-  const categories: { label: string; value: ProductCategory }[] = [
-    { label: 'ALL PIECES', value: 'all' },
-    { label: 'SHIRTS', value: 't-shirts' },
-    { label: 'JOGGERS', value: 'joggers' },
-    { label: 'SHORTS', value: 'shorts' },
-    { label: 'BOXERS', value: 'boxers' },
-    { label: 'VESTS', value: 'vests' },
-    { label: 'SOCKS', value: 'socks' },
-    { label: 'CAPS', value: 'accessories' },
-  ];
+  // Dynamically show only categories that have products in the store
+  const categories = useMemo(() => {
+    const presentCategories = new Set(products.map((p) => p.category));
+    const masterOrder: { label: string; value: ProductCategory }[] = [
+      { label: 'ALL PIECES', value: 'all' },
+      { label: 'SHIRTS', value: 't-shirts' },
+      { label: 'CAPS', value: 'accessories' },
+      { label: 'JOGGERS', value: 'joggers' },
+      { label: 'SHORTS', value: 'shorts' },
+      { label: 'BOXERS', value: 'boxers' },
+      { label: 'VESTS', value: 'vests' },
+      { label: 'SOCKS', value: 'socks' },
+      { label: 'HOODIES', value: 'hoodies' },
+      { label: 'PANTS', value: 'pants' },
+    ];
+    return masterOrder.filter((cat) => cat.value === 'all' || presentCategories.has(cat.value));
+  }, [products]);
 
   const filteredProducts = activeCategory === 'all'
     ? products
