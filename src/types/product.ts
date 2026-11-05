@@ -6,7 +6,72 @@ export type ProductCategory =
   | 'pants'
   | 'shorts'
   | 'shirts'
-  | 'accessories';
+  | 'accessories'
+  | 'joggers'
+  | 'boxers'
+  | 'vests'
+  | 'socks';
+
+export interface CategoryOption {
+  label: string;
+  value: ProductCategory;
+}
+
+export const PRODUCT_CATEGORIES: CategoryOption[] = [
+  { label: 'ALL PIECES', value: 'all' },
+  { label: 'SHIRTS', value: 't-shirts' },
+  { label: 'JOGGERS', value: 'joggers' },
+  { label: 'SHORTS', value: 'shorts' },
+  { label: 'BOXERS', value: 'boxers' },
+  { label: 'VEST (SINGLETS)', value: 'vests' },
+  { label: 'SOCKS', value: 'socks' },
+  { label: 'CAPS & ACCESSORIES', value: 'accessories' },
+  { label: 'HOODIES', value: 'hoodies' },
+  { label: 'PANTS', value: 'pants' },
+  { label: 'JEANS', value: 'jeans' },
+];
+
+export const ADMIN_CATEGORY_OPTIONS = [
+  { label: 'Shirts', value: 't-shirts' },
+  { label: 'Joggers', value: 'joggers' },
+  { label: 'Shorts', value: 'shorts' },
+  { label: 'Boxers', value: 'boxers' },
+  { label: 'Vest (Singlets)', value: 'vests' },
+  { label: 'Socks', value: 'socks' },
+  { label: 'Caps & Accessories', value: 'accessories' },
+  { label: 'Hoodies', value: 'hoodies' },
+  { label: 'Pants', value: 'pants' },
+  { label: 'Jeans', value: 'jeans' },
+] as const;
+
+export const formatCategoryName = (cat: string): string => {
+  switch (cat) {
+    case 't-shirts':
+    case 'shirts':
+      return 'Shirts';
+    case 'joggers':
+      return 'Joggers';
+    case 'shorts':
+      return 'Shorts';
+    case 'boxers':
+      return 'Boxers';
+    case 'vests':
+    case 'vest':
+      return 'Vest (Singlet)';
+    case 'socks':
+      return 'Socks';
+    case 'accessories':
+      return 'Caps & Accessories';
+    case 'hoodies':
+      return 'Hoodies';
+    case 'pants':
+      return 'Pants';
+    case 'jeans':
+      return 'Jeans';
+    default:
+      return cat ? cat.charAt(0).toUpperCase() + cat.slice(1) : 'Piece';
+  }
+};
 
 export type CurrencyCode = 'GHS' | 'USD' | 'GBP' | 'EUR';
 

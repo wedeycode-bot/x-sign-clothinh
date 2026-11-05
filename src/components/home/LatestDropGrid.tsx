@@ -16,6 +16,11 @@ export const LatestDropGrid: React.FC = () => {
   const categories: { label: string; value: ProductCategory }[] = [
     { label: 'ALL PIECES', value: 'all' },
     { label: 'SHIRTS', value: 't-shirts' },
+    { label: 'JOGGERS', value: 'joggers' },
+    { label: 'SHORTS', value: 'shorts' },
+    { label: 'BOXERS', value: 'boxers' },
+    { label: 'VESTS', value: 'vests' },
+    { label: 'SOCKS', value: 'socks' },
     { label: 'CAPS', value: 'accessories' },
   ];
 
@@ -65,11 +70,18 @@ export const LatestDropGrid: React.FC = () => {
       </div>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProducts.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
-      </div>
+      {filteredProducts.length === 0 ? (
+        <div className="py-16 text-center rounded-2xl border border-dashed border-black/10 dark:border-white/10 font-mono text-xs text-zinc-500">
+          <p className="text-zinc-900 dark:text-white font-semibold mb-1">Upcoming drop arriving soon</p>
+          <p>New pieces in this category are being tailored at the atelier.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+      )}
     </section>
   );
 };

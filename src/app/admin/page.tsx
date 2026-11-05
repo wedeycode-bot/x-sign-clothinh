@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useProducts } from '@/context/ProductsContext';
 import { useCart } from '@/context/CartContext';
-import { Product, ProductCategory, GarmentType } from '@/types/product';
+import { Product, ProductCategory, GarmentType, ADMIN_CATEGORY_OPTIONS, formatCategoryName } from '@/types/product';
 import { BRAND_CONFIG } from '@/config/brand';
 import {
   ShieldCheck,
@@ -467,6 +467,26 @@ export default function AdminPage() {
       }
     } catch {
       setNotification({ type: 'error', message: 'Could not contact server.' });
+    }
+  };
+
+  const getGarmentType = (category: ProductCategory): GarmentType => {
+    switch (category) {
+      case 'accessories':
+      case 'socks':
+        return 'accessory';
+      case 'vests':
+        return 'vest';
+      case 'hoodies':
+        return 'hoodie';
+      case 'pants':
+      case 'jeans':
+      case 'joggers':
+      case 'shorts':
+      case 'boxers':
+        return 'pants';
+      default:
+        return 'tshirt';
     }
   };
 
@@ -1343,8 +1363,8 @@ export default function AdminPage() {
           </button>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 sm:w-64">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 sm:w-64 min-w-[180px]">
             <input
               type="text"
               placeholder="Filter by name or category..."
@@ -1355,11 +1375,24 @@ export default function AdminPage() {
             <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
           </div>
 
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="h-9 px-3 rounded-xl bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white focus:outline-none focus:border-black dark:focus:border-white"
+          >
+            <option value="all">All Categories</option>
+            {ADMIN_CATEGORY_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+
           <button
             onClick={() => refreshProducts()}
             disabled={isLoading}
             title="Refresh product list"
-            className="h-9 w-9 rounded-xl border border-black/10 dark:border-white/10 flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white"
+            className="h-9 w-9 rounded-xl border border-black/10 dark:border-white/10 flex items-center justify-center text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white shrink-0"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
@@ -1409,7 +1442,7 @@ export default function AdminPage() {
                   <div className="space-y-1.5 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-mono text-[10px] tracking-wider uppercase font-medium">
-                        {p.category}
+                        {formatCategoryName(p.category)}
                       </span>
                       {p.dropName && (
                         <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest truncate">
@@ -1598,8 +1631,11 @@ export default function AdminPage() {
                     onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value as ProductCategory })}
                     className="w-full h-11 px-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-sm font-sans text-zinc-950 dark:text-white focus:outline-none focus:border-black dark:focus:border-white"
                   >
-                    <option value="t-shirts">Shirts</option>
-                    <option value="accessories">Caps</option>
+                    {ADMIN_CATEGORY_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -1979,17 +2015,29 @@ export default function AdminPage() {
                   </label>
                   <select
                     value={newProductForm.category}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      const cat = e.target.value as ProductCategory;
+                      const gType = getGarmentType(cat);
+                      let defaultSizes = ['S', 'M', 'L', 'XL'];
+                      if (cat === 'accessories' || cat === 'socks') {
+                        defaultSizes = ['ONE SIZE'];
+                      } else if (cat === 't-shirts' || cat === 'hoodies' || cat === 'joggers') {
+                        defaultSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+                      }
                       setNewProductForm({
                         ...newProductForm,
-                        category: e.target.value as ProductCategory,
-                        garmentType: e.target.value === 'accessories' ? 'accessory' : 'tshirt',
-                      })
-                    }
+                        category: cat,
+                        garmentType: gType,
+                        sizes: defaultSizes,
+                      });
+                    }}
                     className="w-full h-11 px-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-sm font-sans text-zinc-950 dark:text-white focus:outline-none focus:border-black dark:focus:border-white"
                   >
-                    <option value="t-shirts">Shirts</option>
-                    <option value="accessories">Caps</option>
+                    {ADMIN_CATEGORY_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

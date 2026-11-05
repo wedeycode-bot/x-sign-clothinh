@@ -24,6 +24,11 @@ function ShopContent() {
   const categories: { label: string; value: ProductCategory }[] = [
     { label: 'ALL PIECES', value: 'all' },
     { label: 'SHIRTS', value: 't-shirts' },
+    { label: 'JOGGERS', value: 'joggers' },
+    { label: 'SHORTS', value: 'shorts' },
+    { label: 'BOXERS', value: 'boxers' },
+    { label: 'VESTS (SINGLETS)', value: 'vests' },
+    { label: 'SOCKS', value: 'socks' },
     { label: 'CAPS', value: 'accessories' },
   ];
 
