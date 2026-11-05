@@ -18,16 +18,24 @@ interface ProductsContextType {
 const ProductsContext = createContext<ProductsContextType | undefined>(undefined);
 
 export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Start with bundled data so the page isn't blank, but replace immediately with API data
   const [products, setProducts] = useState<Product[]>(initialProductsData as Product[]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const refreshProducts = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await fetch('/api/products', { cache: 'no-store' });
+      // Add cache-busting query param to defeat any edge/browser caching
+      const res = await fetch(`/api/products?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      });
       if (res.ok) {
         const data = await res.json();
-        if (data.success && Array.isArray(data.products)) {
+        if (data.success && Array.isArray(data.products) && data.products.length > 0) {
           setProducts(data.products);
         }
       }
@@ -97,6 +105,8 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             setProducts((prev) =>
               prev.map((p) => (p.id === id ? data.product : p))
             );
+            // Also refresh from server to confirm Supabase persistence
+            setTimeout(() => refreshProducts(), 500);
             return true;
           }
         }
@@ -106,7 +116,7 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return false;
       }
     },
-    []
+    [refreshProducts]
   );
 
   const addProduct = useCallback(

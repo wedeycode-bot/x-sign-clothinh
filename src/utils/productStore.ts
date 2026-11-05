@@ -1,13 +1,6 @@
-import fs from 'fs/promises';
-import path from 'path';
 import { Product } from '@/types/product';
 import initialProductsData from '@/data/products.json';
 import { getSupabaseServer, isSupabaseServerConfigured } from '@/lib/supabaseServer';
-
-const PRODUCTS_FILE_PATH = path.join(process.cwd(), 'src', 'data', 'products.json');
-
-// In-memory cache fallback in case file system has transient read/write locks
-let inMemoryProducts: Product[] = [...(initialProductsData as Product[])];
 
 function mapRowToProduct(row: any): Product {
   return {
@@ -77,51 +70,43 @@ function mapProductToRow(p: Product): any {
   };
 }
 
+/**
+ * ALWAYS reads from Supabase if configured. No in-memory caching.
+ * Falls back to bundled products.json only if Supabase is not configured or query fails.
+ */
 export async function getStoredProducts(): Promise<Product[]> {
-  // 1. Try fetching from Supabase if configured
+  // 1. Try fetching from Supabase — ALWAYS, no cache
   if (isSupabaseServerConfigured()) {
     try {
       const supabase = getSupabaseServer();
       if (supabase) {
+        console.log('[productStore] Querying Supabase for products...');
         const { data, error } = await supabase
           .from('products')
           .select('*')
           .order('created_at', { ascending: false });
 
         if (!error && Array.isArray(data) && data.length > 0) {
-          const mapped = data.map(mapRowToProduct);
-          inMemoryProducts = mapped;
-          return mapped;
+          console.log(`[productStore] ✅ Got ${data.length} products from Supabase`);
+          return data.map(mapRowToProduct);
         } else if (error) {
-          console.warn('[productStore] Supabase query error, falling back to local:', error.message);
+          console.error('[productStore] ❌ Supabase query error:', error.message);
+        } else {
+          console.warn('[productStore] ⚠️ Supabase returned empty data, falling back to local');
         }
+      } else {
+        console.warn('[productStore] ⚠️ Supabase client is null despite being configured');
       }
     } catch (err) {
-      console.warn('[productStore] Supabase connection error:', err);
+      console.error('[productStore] ❌ Supabase connection error:', err);
     }
+  } else {
+    console.log('[productStore] Supabase not configured, using local data');
   }
 
-  // 2. Fallback to reading products.json file
-  try {
-    const fileContent = await fs.readFile(PRODUCTS_FILE_PATH, 'utf-8');
-    const parsed = JSON.parse(fileContent) as Product[];
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      inMemoryProducts = parsed;
-      return parsed;
-    }
-  } catch (error) {
-    console.warn('[productStore] Error reading products.json, using in-memory store:', error);
-  }
-  return inMemoryProducts;
-}
-
-export async function saveStoredProducts(products: Product[]): Promise<void> {
-  inMemoryProducts = products;
-  try {
-    await fs.writeFile(PRODUCTS_FILE_PATH, JSON.stringify(products, null, 2), 'utf-8');
-  } catch (error) {
-    console.warn('[productStore] Local disk write skipped or failed (safe on serverless/Vercel):', error);
-  }
+  // 2. Fallback to bundled products.json (static import, no file system read needed)
+  console.log('[productStore] Using bundled products.json as fallback');
+  return [...(initialProductsData as Product[])];
 }
 
 export async function updateStoredProduct(
@@ -144,6 +129,7 @@ export async function updateStoredProduct(
       const supabase = getSupabaseServer();
       if (supabase) {
         const row = mapProductToRow(updatedProduct);
+        console.log(`[productStore] Updating product "${targetProduct.id}" in Supabase...`);
         const { data, error } = await supabase
           .from('products')
           .update(row)
@@ -152,22 +138,18 @@ export async function updateStoredProduct(
           .single();
 
         if (error) {
-          console.error('[productStore] Supabase update failed:', error.message);
+          console.error('[productStore] ❌ Supabase update failed:', error.message);
         } else if (data) {
-          const fresh = mapRowToProduct(data);
-          currentProducts[index] = fresh;
-          await saveStoredProducts(currentProducts);
-          return fresh;
+          console.log(`[productStore] ✅ Product "${data.title}" updated in Supabase`);
+          return mapRowToProduct(data);
         }
       }
     } catch (err) {
-      console.error('[productStore] Supabase update error:', err);
+      console.error('[productStore] ❌ Supabase update error:', err);
     }
   }
 
-  // 2. Update local store
-  currentProducts[index] = updatedProduct;
-  await saveStoredProducts(currentProducts);
+  // 2. Return the locally merged product as fallback
   return updatedProduct;
 }
 
@@ -207,6 +189,7 @@ export async function addStoredProduct(newProduct: Product): Promise<Product> {
       const supabase = getSupabaseServer();
       if (supabase) {
         const row = mapProductToRow(completeProduct);
+        console.log(`[productStore] Inserting product "${completeProduct.title}" into Supabase...`);
         const { data, error } = await supabase
           .from('products')
           .insert(row)
@@ -214,22 +197,18 @@ export async function addStoredProduct(newProduct: Product): Promise<Product> {
           .single();
 
         if (error) {
-          console.error('[productStore] Supabase insert failed:', error.message);
+          console.error('[productStore] ❌ Supabase insert failed:', error.message);
         } else if (data) {
-          const fresh = mapRowToProduct(data);
-          currentProducts.unshift(fresh);
-          await saveStoredProducts(currentProducts);
-          return fresh;
+          console.log(`[productStore] ✅ Product "${data.title}" inserted into Supabase`);
+          return mapRowToProduct(data);
         }
       }
     } catch (err) {
-      console.error('[productStore] Supabase insert error:', err);
+      console.error('[productStore] ❌ Supabase insert error:', err);
     }
   }
 
   // 2. Local fallback
-  currentProducts.unshift(completeProduct);
-  await saveStoredProducts(currentProducts);
   return completeProduct;
 }
 
@@ -243,22 +222,23 @@ export async function deleteStoredProduct(id: string): Promise<boolean> {
     try {
       const supabase = getSupabaseServer();
       if (supabase) {
+        console.log(`[productStore] Deleting product "${target.id}" from Supabase...`);
         const { error } = await supabase
           .from('products')
           .delete()
           .eq('id', target.id);
 
         if (error) {
-          console.error('[productStore] Supabase delete failed:', error.message);
+          console.error('[productStore] ❌ Supabase delete failed:', error.message);
+          return false;
         }
+        console.log(`[productStore] ✅ Product "${target.id}" deleted from Supabase`);
+        return true;
       }
     } catch (err) {
-      console.error('[productStore] Supabase delete error:', err);
+      console.error('[productStore] ❌ Supabase delete error:', err);
     }
   }
 
-  // 2. Remove from local store
-  const filtered = currentProducts.filter((p) => p.id !== target.id && p.slug !== target.id);
-  await saveStoredProducts(filtered);
   return true;
 }
