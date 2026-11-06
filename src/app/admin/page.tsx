@@ -33,6 +33,16 @@ import {
   Camera,
   Upload,
   Palette,
+  ArrowLeft,
+  ArrowRight,
+  Star,
+  Link as LinkIcon,
+  Sparkles,
+  Layers,
+  ChevronDown,
+  ChevronUp,
+  Sliders,
+  Tag,
 } from 'lucide-react';
 
 /* Inline Stock Modifier Component */
@@ -296,6 +306,20 @@ export default function AdminPage() {
   ];
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Full Control: Image URLs & Preset Pickers
+  const [editingImageUrl, setEditingImageUrl] = useState('');
+  const [newProductImageUrl, setNewProductImageUrl] = useState('');
+  const [newLookImageUrl, setNewLookImageUrl] = useState('');
+  const [showPresetsEdit, setShowPresetsEdit] = useState(false);
+  const [showPresetsNew, setShowPresetsNew] = useState(false);
+
+  // Full Control: Sizes, Features & Care specs
+  const [customSizeEdit, setCustomSizeEdit] = useState('');
+  const [customSizeNew, setCustomSizeNew] = useState('');
+  const [newFeatureEdit, setNewFeatureEdit] = useState('');
+  const [newCareEdit, setNewCareEdit] = useState('');
+  const STANDARD_SIZES = ['S', 'M', 'L', 'XL', 'XXL', '3XL', 'ONE SIZE'];
 
   // Resend Email Notification Status
   const [emailConfig, setEmailConfig] = useState<{ configured: boolean; adminEmail: string } | null>(null);
@@ -653,10 +677,25 @@ export default function AdminPage() {
       ...editingProduct,
       stockCount: stock,
       priceGHS: price,
-      priceUSD: Math.round(price * 0.076),
-      priceGBP: Math.round(price * 0.061),
-      priceEUR: Math.round(price * 0.070),
+      priceUSD: editingProduct.priceUSD || Math.round(price * 0.076),
+      priceGBP: editingProduct.priceGBP || Math.round(price * 0.061),
+      priceEUR: editingProduct.priceEUR || Math.round(price * 0.070),
       isSoldOut,
+      images: Array.isArray(editingProduct.images) && editingProduct.images.length > 0 ? editingProduct.images : ['/products/shirts/IMG_4266.PNG'],
+      sizes: Array.isArray(editingProduct.sizes) && editingProduct.sizes.length > 0 ? editingProduct.sizes : ['S', 'M', 'L', 'XL'],
+      colors: Array.isArray(editingProduct.colors) && editingProduct.colors.length > 0 ? editingProduct.colors : [
+        { name: 'Onyx Black', hex: '#111113', modelHex: '#18181b', images: editingProduct.images || ['/products/shirts/IMG_4266.PNG'] },
+      ],
+      fabricDetails: editingProduct.fabricDetails || {
+        composition: '100% Combed Heavy Cotton',
+        weight: '320 GSM',
+        finish: 'Precision Screenprint & DTF',
+        origin: 'Atelier Crafted in Accra',
+      },
+      features: Array.isArray(editingProduct.features) ? editingProduct.features : [],
+      careInstructions: Array.isArray(editingProduct.careInstructions) ? editingProduct.careInstructions : [],
+      isFeatured: Boolean(editingProduct.isFeatured),
+      isNew: Boolean(editingProduct.isNew),
     });
 
     setIsSubmitting(false);
@@ -1672,66 +1711,125 @@ export default function AdminPage() {
                       <span>Product Mockup Pictures ({(editingProduct.images || []).length})</span>
                     </h4>
                     <p className="text-[11px] text-zinc-500 mt-0.5">
-                      Cutouts & packshots that showcase this piece on the shop and product page.
+                      Tap the red trash icon on any photo to remove it immediately. Reorder with arrows or set your cover photo.
                     </p>
                   </div>
+                  {(editingProduct.images || []).length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (confirm('Are you sure you want to remove all pictures from this piece?')) {
+                          setEditingProduct({ ...editingProduct, images: [] });
+                        }
+                      }}
+                      className="text-[11px] font-mono text-rose-500 hover:text-rose-600 underline font-semibold"
+                    >
+                      Clear All
+                    </button>
+                  )}
                 </div>
 
                 {/* Gallery of current mockups */}
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                  {(editingProduct.images || []).map((img, idx) => {
-                    const isCover = idx === 0;
-                    return (
-                      <div
-                        key={idx}
-                        className={`group relative aspect-[4/5] rounded-xl overflow-hidden border p-1 bg-white dark:bg-black/60 transition-all ${
-                          isCover ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-black/10 dark:border-white/10'
-                        }`}
-                      >
-                        <div className="relative w-full h-full">
-                          <Image
-                            src={img}
-                            alt=""
-                            fill
-                            className={img.toLowerCase().endsWith('.png') ? 'object-contain p-1' : 'object-cover'}
-                          />
-                        </div>
-                        {isCover && (
-                          <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-emerald-500 text-black text-[9px] font-mono font-bold uppercase">
-                            Cover
-                          </span>
-                        )}
-                        <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-1">
-                          {!isCover && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newImages = [img, ...editingProduct.images.filter((_, i) => i !== idx)];
-                                setEditingProduct({ ...editingProduct, images: newImages });
-                              }}
-                              className="px-2 py-1 rounded bg-white text-black text-[9px] font-bold uppercase tracking-wider shadow"
-                            >
-                              Make Cover
-                            </button>
-                          )}
+                {(editingProduct.images || []).length === 0 ? (
+                  <div className="p-6 text-center rounded-xl border border-dashed border-black/15 dark:border-white/15 text-xs text-zinc-500 font-mono">
+                    No pictures attached yet. Add photos from your camera roll or paste an image URL below.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {(editingProduct.images || []).map((img, idx) => {
+                      const isCover = idx === 0;
+                      return (
+                        <div
+                          key={idx}
+                          className={`relative aspect-[4/5] rounded-xl overflow-hidden border p-1 bg-white dark:bg-black/60 shadow-sm transition-all ${
+                            isCover ? 'border-emerald-500 ring-2 ring-emerald-500/40' : 'border-black/10 dark:border-white/10'
+                          }`}
+                        >
+                          <div className="relative w-full h-full">
+                            <Image
+                              src={img}
+                              alt=""
+                              fill
+                              className={img.toLowerCase().endsWith('.png') ? 'object-contain p-1' : 'object-cover'}
+                            />
+                          </div>
+
+                          {/* Cover Badge / Set Cover Button */}
+                          <div className="absolute top-1.5 left-1.5 z-10">
+                            {isCover ? (
+                              <span className="px-2 py-0.5 rounded-md bg-emerald-500 text-black text-[9px] font-mono font-bold uppercase shadow">
+                                ★ Cover
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newImages = [img, ...editingProduct.images.filter((_, i) => i !== idx)];
+                                  setEditingProduct({ ...editingProduct, images: newImages });
+                                }}
+                                className="px-1.5 py-0.5 rounded-md bg-black/85 hover:bg-emerald-500 text-white hover:text-black text-[9px] font-mono font-bold uppercase shadow transition-colors"
+                              >
+                                Set Cover
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Always-visible RED TRASH BUTTON on top-right */}
                           <button
                             type="button"
                             onClick={() => {
                               const newImages = editingProduct.images.filter((_, i) => i !== idx);
                               setEditingProduct({ ...editingProduct, images: newImages });
                             }}
-                            className="p-1.5 rounded-lg bg-rose-500 text-white shadow hover:bg-rose-600 transition-colors"
-                            title="Remove picture"
+                            className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-rose-600 hover:bg-rose-700 active:scale-90 text-white flex items-center justify-center shadow-lg transition-all z-10"
+                            title="Delete this picture"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
 
-                {/* Upload straight from camera roll */}
+                          {/* Bottom Reorder Arrows */}
+                          <div className="absolute bottom-1.5 inset-x-1.5 flex items-center justify-between z-10">
+                            {idx > 0 ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newImgs = [...editingProduct.images];
+                                  const temp = newImgs[idx - 1];
+                                  newImgs[idx - 1] = newImgs[idx];
+                                  newImgs[idx] = temp;
+                                  setEditingProduct({ ...editingProduct, images: newImgs });
+                                }}
+                                className="w-6 h-6 rounded-md bg-black/85 hover:bg-black text-white flex items-center justify-center shadow transition-colors active:scale-95"
+                                title="Move left"
+                              >
+                                <ArrowLeft className="w-3 h-3" />
+                              </button>
+                            ) : <span />}
+
+                            {idx < editingProduct.images.length - 1 ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newImgs = [...editingProduct.images];
+                                  const temp = newImgs[idx + 1];
+                                  newImgs[idx + 1] = newImgs[idx];
+                                  newImgs[idx] = temp;
+                                  setEditingProduct({ ...editingProduct, images: newImgs });
+                                }}
+                                className="w-6 h-6 rounded-md bg-black/85 hover:bg-black text-white flex items-center justify-center shadow transition-colors active:scale-95 ml-auto"
+                                title="Move right"
+                              >
+                                <ArrowRight className="w-3 h-3" />
+                              </button>
+                            ) : <span />}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Upload from camera roll */}
                 <div className="pt-1">
                   <label className="cursor-pointer w-full h-14 rounded-2xl border-2 border-dashed border-emerald-500/40 hover:border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10 flex items-center justify-center gap-3 transition-all">
                     {isUploadingMockup ? (
@@ -1741,10 +1839,10 @@ export default function AdminPage() {
                     )}
                     <div className="text-left">
                       <span className="text-xs font-bold uppercase tracking-wider text-zinc-950 dark:text-white block">
-                        {isUploadingMockup ? 'Uploading from Camera Roll...' : '+ Add Photo(s) from Camera Roll'}
+                        {isUploadingMockup ? 'Uploading from Camera Roll...' : '+ Add Photo(s) from Camera Roll / Files'}
                       </span>
                       <span className="text-[10px] text-zinc-500 font-mono block">
-                        Select mockups & packshots straight from your camera roll
+                        Select packshots or cutouts directly from your phone or device
                       </span>
                     </div>
                     <input
@@ -1756,6 +1854,112 @@ export default function AdminPage() {
                       disabled={isUploadingMockup}
                     />
                   </label>
+                </div>
+
+                {/* Add Image by Direct URL */}
+                <div className="p-3 rounded-xl bg-zinc-100 dark:bg-black/40 border border-black/10 dark:border-white/10 space-y-2">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-bold block">
+                    Or Paste Direct Image URL (Cloud / Supabase / Web)
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="url"
+                      placeholder="https://.../photo.png or /products/shirts/..."
+                      value={editingImageUrl}
+                      onChange={(e) => setEditingImageUrl(e.target.value)}
+                      className="flex-1 h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!editingImageUrl.trim()) return;
+                        setEditingProduct({
+                          ...editingProduct,
+                          images: [...(editingProduct.images || []), editingImageUrl.trim()],
+                        });
+                        setEditingImageUrl('');
+                        setNotification({ type: 'success', message: 'Picture URL attached to piece!' });
+                      }}
+                      className="h-9 px-3.5 rounded-lg bg-black text-white dark:bg-white dark:text-black font-mono text-xs font-bold uppercase shrink-0 shadow-sm"
+                    >
+                      + Attach URL
+                    </button>
+                  </div>
+                </div>
+
+                {/* Preset Atelier Mockups Accordion */}
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowPresetsEdit(!showPresetsEdit)}
+                    className="w-full py-2 px-3 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-black/30 flex items-center justify-between text-xs font-mono text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors"
+                  >
+                    <span className="flex items-center gap-1.5 font-bold uppercase text-[11px]">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                      Browse Preset Atelier Mockups (Tees & Caps)
+                    </span>
+                    {showPresetsEdit ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </button>
+
+                  {showPresetsEdit && (
+                    <div className="mt-2.5 p-3 rounded-xl bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 space-y-3">
+                      <div>
+                        <span className="text-[10px] font-mono uppercase text-zinc-500 font-bold block mb-2">Signature Shirts:</span>
+                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                          {shirtMockupPresets.map((p, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => {
+                                if (!(editingProduct.images || []).includes(p.path)) {
+                                  setEditingProduct({
+                                    ...editingProduct,
+                                    images: [...(editingProduct.images || []), p.path],
+                                  });
+                                  setNotification({ type: 'success', message: `Added ${p.label} mockup!` });
+                                }
+                              }}
+                              className="group relative aspect-square rounded-lg border border-black/10 dark:border-white/10 p-1 bg-zinc-50 dark:bg-black/60 hover:border-emerald-500 transition-all flex flex-col items-center justify-center"
+                              title={`Add ${p.label}`}
+                            >
+                              <div className="relative w-full h-full">
+                                <Image src={p.path} alt={p.label} fill className="object-contain p-0.5" />
+                              </div>
+                              <span className="text-[8px] font-mono text-zinc-500 truncate w-full text-center mt-0.5">{p.label.split('/')[0]}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] font-mono uppercase text-zinc-500 font-bold block mb-2">Headwear & Caps:</span>
+                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                          {capMockupPresets.map((p, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => {
+                                if (!(editingProduct.images || []).includes(p.path)) {
+                                  setEditingProduct({
+                                    ...editingProduct,
+                                    images: [...(editingProduct.images || []), p.path],
+                                  });
+                                  setNotification({ type: 'success', message: `Added ${p.label} mockup!` });
+                                }
+                              }}
+                              className="group relative aspect-square rounded-lg border border-black/10 dark:border-white/10 p-1 bg-zinc-50 dark:bg-black/60 hover:border-emerald-500 transition-all flex flex-col items-center justify-center"
+                              title={`Add ${p.label}`}
+                            >
+                              <div className="relative w-full h-full">
+                                <Image src={p.path} alt={p.label} fill className="object-contain p-0.5" />
+                              </div>
+                              <span className="text-[8px] font-mono text-zinc-500 truncate w-full text-center mt-0.5">{p.label.split(' ')[0]}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1896,6 +2100,260 @@ export default function AdminPage() {
                       <span>Add Design Swatch</span>
                     </button>
                   </div>
+                </div>
+              </div>
+
+              {/* Available Sizes Matrix */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-black/10 dark:border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-950 dark:text-white flex items-center gap-2">
+                    <Sliders className="w-4 h-4 text-emerald-500" />
+                    <span>Available Sizing Matrix ({(editingProduct.sizes || []).length} active)</span>
+                  </h4>
+                  <span className="text-[10px] text-zinc-500 font-mono">Tap chip to enable / disable</span>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {STANDARD_SIZES.map((s) => {
+                    const isSelected = (editingProduct.sizes || []).includes(s);
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => {
+                          const current = editingProduct.sizes || [];
+                          const updated = isSelected
+                            ? current.filter((x) => x !== s)
+                            : [...current, s];
+                          setEditingProduct({
+                            ...editingProduct,
+                            sizes: updated.length > 0 ? updated : [s],
+                          });
+                        }}
+                        className={`h-9 px-3.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all shadow-sm ${
+                          isSelected
+                            ? 'bg-black text-white dark:bg-white dark:text-black ring-2 ring-emerald-500/30'
+                            : 'bg-white dark:bg-zinc-800 text-zinc-500 border border-black/10 dark:border-white/10 hover:border-black dark:hover:border-white'
+                        }`}
+                      >
+                        {s} {isSelected ? '✓' : ''}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Add Custom Size */}
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    placeholder="Custom size (e.g. 28, 30, 32, Oversized OS)"
+                    value={customSizeEdit}
+                    onChange={(e) => setCustomSizeEdit(e.target.value)}
+                    className="flex-1 h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!customSizeEdit.trim()) return;
+                      const size = customSizeEdit.trim().toUpperCase();
+                      if (!(editingProduct.sizes || []).includes(size)) {
+                        setEditingProduct({
+                          ...editingProduct,
+                          sizes: [...(editingProduct.sizes || []), size],
+                        });
+                      }
+                      setCustomSizeEdit('');
+                    }}
+                    className="h-9 px-3.5 rounded-lg bg-black text-white dark:bg-white dark:text-black font-mono text-xs font-bold uppercase shrink-0"
+                  >
+                    + Add Size
+                  </button>
+                </div>
+              </div>
+
+              {/* Product Badges & Runway Spotlight */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-black/10 dark:border-white/10 flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-950 dark:text-white block">
+                      Featured Runway Piece
+                    </span>
+                    <span className="text-[10px] text-zinc-500 font-mono">Spotlighted prominently on storefront</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setEditingProduct({ ...editingProduct, isFeatured: !editingProduct.isFeatured })}
+                    className={`h-8 px-3 rounded-lg font-mono text-xs font-bold uppercase transition-all ${
+                      editingProduct.isFeatured
+                        ? 'bg-amber-500 text-black shadow-sm'
+                        : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                    }`}
+                  >
+                    {editingProduct.isFeatured ? '★ Featured' : 'Normal'}
+                  </button>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-900/60 border border-black/10 dark:border-white/10 flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-zinc-950 dark:text-white block">
+                      New Release Badge
+                    </span>
+                    <span className="text-[10px] text-zinc-500 font-mono">Highlights item with &ldquo;NEW&rdquo; tag</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setEditingProduct({ ...editingProduct, isNew: !editingProduct.isNew })}
+                    className={`h-8 px-3 rounded-lg font-mono text-xs font-bold uppercase transition-all ${
+                      editingProduct.isNew
+                        ? 'bg-emerald-600 text-white shadow-sm'
+                        : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                    }`}
+                  >
+                    {editingProduct.isNew ? 'New' : 'Standard'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Fabric & Technical Atelier Details */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-black/10 dark:border-white/10 space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-950 dark:text-white flex items-center gap-2">
+                  <Layers className="w-4 h-4 text-emerald-500" />
+                  <span>Fabric & Atelier Technical Details</span>
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-mono text-zinc-500">Composition</label>
+                    <input
+                      type="text"
+                      value={editingProduct.fabricDetails?.composition || '100% Combed Heavy Cotton'}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          fabricDetails: {
+                            ...(editingProduct.fabricDetails || { weight: '320 GSM', finish: 'Precision Screenprint', origin: 'Accra' }),
+                            composition: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-xs text-zinc-950 dark:text-white"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-mono text-zinc-500">Fabric Weight (GSM)</label>
+                    <input
+                      type="text"
+                      value={editingProduct.fabricDetails?.weight || '320 GSM'}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          fabricDetails: {
+                            ...(editingProduct.fabricDetails || { composition: '100% Cotton', finish: 'Precision Screenprint', origin: 'Accra' }),
+                            weight: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-xs text-zinc-950 dark:text-white"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-mono text-zinc-500">Finish & Printing Technique</label>
+                    <input
+                      type="text"
+                      value={editingProduct.fabricDetails?.finish || 'Precision Screenprint & DTF'}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          fabricDetails: {
+                            ...(editingProduct.fabricDetails || { composition: '100% Cotton', weight: '320 GSM', origin: 'Accra' }),
+                            finish: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-xs text-zinc-950 dark:text-white"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] uppercase font-mono text-zinc-500">Atelier Origin</label>
+                    <input
+                      type="text"
+                      value={editingProduct.fabricDetails?.origin || 'Atelier Crafted in Accra'}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          fabricDetails: {
+                            ...(editingProduct.fabricDetails || { composition: '100% Cotton', weight: '320 GSM', finish: 'Screenprint' }),
+                            origin: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-xs text-zinc-950 dark:text-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Product Features Bullet Points */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-black/10 dark:border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-950 dark:text-white flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-emerald-500" />
+                    <span>Product Highlights & Features ({(editingProduct.features || []).length})</span>
+                  </h4>
+                </div>
+
+                <div className="space-y-2">
+                  {(editingProduct.features || []).map((feat, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={feat}
+                        onChange={(e) => {
+                          const updated = [...(editingProduct.features || [])];
+                          updated[idx] = e.target.value;
+                          setEditingProduct({ ...editingProduct, features: updated });
+                        }}
+                        className="flex-1 h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-xs text-zinc-950 dark:text-white"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = (editingProduct.features || []).filter((_, i) => i !== idx);
+                          setEditingProduct({ ...editingProduct, features: updated });
+                        }}
+                        className="w-9 h-9 rounded-lg bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white flex items-center justify-center transition-colors"
+                        title="Remove highlight"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    placeholder="Add bullet point (e.g. Signature raw-edge stitching)"
+                    value={newFeatureEdit}
+                    onChange={(e) => setNewFeatureEdit(e.target.value)}
+                    className="flex-1 h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-xs text-zinc-950 dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!newFeatureEdit.trim()) return;
+                      setEditingProduct({
+                        ...editingProduct,
+                        features: [...(editingProduct.features || []), newFeatureEdit.trim()],
+                      });
+                      setNewFeatureEdit('');
+                    }}
+                    className="h-9 px-3.5 rounded-lg bg-black text-white dark:bg-white dark:text-black font-mono text-xs font-bold uppercase shrink-0"
+                  >
+                    + Add Feature
+                  </button>
                 </div>
               </div>
 
@@ -2086,30 +2544,144 @@ export default function AdminPage() {
                 />
               </div>
 
-              {/* Product Photos straight from Camera Roll */}
-              <div className="space-y-3">
+              {/* Product Photos Gallery */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-black/10 dark:border-white/10 space-y-4">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs uppercase tracking-wider font-mono text-zinc-600 dark:text-zinc-400 font-bold">
-                    Product Photos (From Camera Roll) *
-                  </label>
-                  <span className="text-[11px] font-mono text-zinc-500">
-                    {newProductForm.images.length} photo(s) attached
-                  </span>
+                  <div>
+                    <label className="text-xs uppercase tracking-wider font-mono text-zinc-600 dark:text-zinc-400 font-bold flex items-center gap-2">
+                      <Camera className="w-4 h-4 text-emerald-500" />
+                      <span>Product Photos ({(newProductForm.images || []).length})</span>
+                    </label>
+                    <span className="text-[11px] font-mono text-zinc-500">
+                      Tap the red trash icon on any photo to remove it. Reorder with arrows or set cover.
+                    </span>
+                  </div>
+                  {(newProductForm.images || []).length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setNewProductForm({ ...newProductForm, images: [] })}
+                      className="text-[11px] font-mono text-rose-500 hover:text-rose-600 underline font-semibold"
+                    >
+                      Clear All
+                    </button>
+                  )}
                 </div>
 
                 {newProductForm.images.length === 0 ? (
-                  <label className="cursor-pointer flex flex-col items-center justify-center p-8 rounded-2xl border-2 border-dashed border-emerald-500/40 hover:border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10 text-center transition-all">
+                  <div className="p-6 text-center rounded-xl border border-dashed border-black/15 dark:border-white/15 text-xs text-zinc-500 font-mono">
+                    No pictures attached yet. Add photos from your camera roll or paste an image URL below.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {newProductForm.images.map((img, idx) => {
+                      const isCover = idx === 0;
+                      return (
+                        <div
+                          key={idx}
+                          className={`relative aspect-[4/5] rounded-xl overflow-hidden border p-1 bg-white dark:bg-black/60 shadow-sm transition-all ${
+                            isCover ? 'border-emerald-500 ring-2 ring-emerald-500/40' : 'border-black/10 dark:border-white/10'
+                          }`}
+                        >
+                          <div className="relative w-full h-full">
+                            <Image
+                              src={img}
+                              alt=""
+                              fill
+                              className={img.toLowerCase().endsWith('.png') ? 'object-contain p-1' : 'object-cover'}
+                            />
+                          </div>
+
+                          {/* Cover Badge / Set Cover */}
+                          <div className="absolute top-1.5 left-1.5 z-10">
+                            {isCover ? (
+                              <span className="px-2 py-0.5 rounded-md bg-emerald-500 text-black text-[9px] font-mono font-bold uppercase shadow">
+                                ★ Cover
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newImgs = [img, ...newProductForm.images.filter((_, i) => i !== idx)];
+                                  setNewProductForm({ ...newProductForm, images: newImgs });
+                                }}
+                                className="px-1.5 py-0.5 rounded-md bg-black/85 hover:bg-emerald-500 text-white hover:text-black text-[9px] font-mono font-bold uppercase shadow transition-colors"
+                              >
+                                Set Cover
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Always-visible RED TRASH BUTTON on top-right */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newImgs = newProductForm.images.filter((_, i) => i !== idx);
+                              setNewProductForm({ ...newProductForm, images: newImgs });
+                            }}
+                            className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-rose-600 hover:bg-rose-700 active:scale-90 text-white flex items-center justify-center shadow-lg transition-all z-10"
+                            title="Remove photo"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+
+                          {/* Bottom Reorder Arrows */}
+                          <div className="absolute bottom-1.5 inset-x-1.5 flex items-center justify-between z-10">
+                            {idx > 0 ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newImgs = [...newProductForm.images];
+                                  const temp = newImgs[idx - 1];
+                                  newImgs[idx - 1] = newImgs[idx];
+                                  newImgs[idx] = temp;
+                                  setNewProductForm({ ...newProductForm, images: newImgs });
+                                }}
+                                className="w-6 h-6 rounded-md bg-black/85 hover:bg-black text-white flex items-center justify-center shadow transition-colors active:scale-95"
+                                title="Move left"
+                              >
+                                <ArrowLeft className="w-3 h-3" />
+                              </button>
+                            ) : <span />}
+
+                            {idx < newProductForm.images.length - 1 ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const newImgs = [...newProductForm.images];
+                                  const temp = newImgs[idx + 1];
+                                  newImgs[idx + 1] = newImgs[idx];
+                                  newImgs[idx] = temp;
+                                  setNewProductForm({ ...newProductForm, images: newImgs });
+                                }}
+                                className="w-6 h-6 rounded-md bg-black/85 hover:bg-black text-white flex items-center justify-center shadow transition-colors active:scale-95 ml-auto"
+                                title="Move right"
+                              >
+                                <ArrowRight className="w-3 h-3" />
+                              </button>
+                            ) : <span />}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Upload straight from camera roll */}
+                <div className="pt-1">
+                  <label className="cursor-pointer w-full h-14 rounded-2xl border-2 border-dashed border-emerald-500/40 hover:border-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10 flex items-center justify-center gap-3 transition-all">
                     {isUploadingNewProductImage ? (
-                      <RefreshCw className="w-10 h-10 text-emerald-500 animate-spin mb-2" />
+                      <RefreshCw className="w-5 h-5 text-emerald-500 animate-spin" />
                     ) : (
-                      <Camera className="w-10 h-10 text-emerald-500 mb-2" />
+                      <Camera className="w-5 h-5 text-emerald-500" />
                     )}
-                    <span className="text-sm font-bold uppercase tracking-wider text-zinc-950 dark:text-white">
-                      {isUploadingNewProductImage ? 'Uploading Photos...' : 'Upload Photos from Camera Roll'}
-                    </span>
-                    <span className="text-xs text-zinc-500 mt-1 font-mono">
-                      Tap to select packshots or mockups straight from your device
-                    </span>
+                    <div className="text-left">
+                      <span className="text-xs font-bold uppercase tracking-wider text-zinc-950 dark:text-white block">
+                        {isUploadingNewProductImage ? 'Uploading Photos...' : '+ Add Photo(s) from Camera Roll / Files'}
+                      </span>
+                      <span className="text-[10px] text-zinc-500 font-mono block">
+                        Select packshots or cutouts directly from your device
+                      </span>
+                    </div>
                     <input
                       type="file"
                       accept="image/*"
@@ -2119,75 +2691,181 @@ export default function AdminPage() {
                       disabled={isUploadingNewProductImage}
                     />
                   </label>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                      {newProductForm.images.map((img, idx) => {
-                        const isCover = idx === 0;
-                        return (
-                          <div
-                            key={idx}
-                            className={`group relative aspect-[4/5] rounded-xl overflow-hidden border p-1 bg-white dark:bg-black/60 transition-all ${
-                              isCover ? 'border-emerald-500 ring-2 ring-emerald-500/30' : 'border-black/10 dark:border-white/10'
-                            }`}
-                          >
-                            <div className="relative w-full h-full">
-                              <Image
-                                src={img}
-                                alt=""
-                                fill
-                                className={img.toLowerCase().endsWith('.png') ? 'object-contain p-1' : 'object-cover'}
-                              />
-                            </div>
-                            {isCover && (
-                              <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded bg-emerald-500 text-black text-[9px] font-mono font-bold uppercase">
-                                Cover
-                              </span>
-                            )}
-                            <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-1">
-                              {!isCover && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const newImgs = [img, ...newProductForm.images.filter((_, i) => i !== idx)];
-                                    setNewProductForm({ ...newProductForm, images: newImgs });
-                                  }}
-                                  className="px-2 py-1 rounded bg-white text-black text-[9px] font-bold uppercase tracking-wider shadow"
-                                >
-                                  Make Cover
-                                </button>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const newImgs = newProductForm.images.filter((_, i) => i !== idx);
-                                  setNewProductForm({ ...newProductForm, images: newImgs });
-                                }}
-                                className="p-1.5 rounded-lg bg-rose-500 text-white shadow hover:bg-rose-600 transition-colors"
-                                title="Remove photo"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                </div>
 
-                    <label className="cursor-pointer h-10 px-4 rounded-xl border border-black/15 dark:border-white/15 hover:border-black dark:hover:border-white bg-white dark:bg-zinc-900 text-xs font-semibold uppercase tracking-wider text-zinc-800 dark:text-zinc-200 flex items-center justify-center gap-2 transition-all">
-                      <Camera className="w-3.5 h-3.5 text-emerald-500" />
-                      <span>+ Add More Photos from Camera Roll</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        className="hidden"
-                        onChange={handleNewProductFileUpload}
-                        disabled={isUploadingNewProductImage}
-                      />
-                    </label>
+                {/* Add Image by Direct URL */}
+                <div className="p-3 rounded-xl bg-zinc-100 dark:bg-black/40 border border-black/10 dark:border-white/10 space-y-2">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-bold block">
+                    Or Paste Direct Image URL (Cloud / Supabase / Web)
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="url"
+                      placeholder="https://.../photo.png or /products/shirts/..."
+                      value={newProductImageUrl}
+                      onChange={(e) => setNewProductImageUrl(e.target.value)}
+                      className="flex-1 h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!newProductImageUrl.trim()) return;
+                        setNewProductForm({
+                          ...newProductForm,
+                          images: [...newProductForm.images, newProductImageUrl.trim()],
+                        });
+                        setNewProductImageUrl('');
+                        setNotification({ type: 'success', message: 'Picture URL attached!' });
+                      }}
+                      className="h-9 px-3.5 rounded-lg bg-black text-white dark:bg-white dark:text-black font-mono text-xs font-bold uppercase shrink-0 shadow-sm"
+                    >
+                      + Attach URL
+                    </button>
                   </div>
-                )}
+                </div>
+
+                {/* Preset Atelier Mockups Accordion */}
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setShowPresetsNew(!showPresetsNew)}
+                    className="w-full py-2 px-3 rounded-xl border border-black/10 dark:border-white/10 bg-white/50 dark:bg-black/30 flex items-center justify-between text-xs font-mono text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white transition-colors"
+                  >
+                    <span className="flex items-center gap-1.5 font-bold uppercase text-[11px]">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                      Browse Preset Atelier Mockups (Tees & Caps)
+                    </span>
+                    {showPresetsNew ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </button>
+
+                  {showPresetsNew && (
+                    <div className="mt-2.5 p-3 rounded-xl bg-white dark:bg-zinc-900 border border-black/10 dark:border-white/10 space-y-3">
+                      <div>
+                        <span className="text-[10px] font-mono uppercase text-zinc-500 font-bold block mb-2">Signature Shirts:</span>
+                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                          {shirtMockupPresets.map((p, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => {
+                                if (!newProductForm.images.includes(p.path)) {
+                                  setNewProductForm({
+                                    ...newProductForm,
+                                    images: [...newProductForm.images, p.path],
+                                  });
+                                  setNotification({ type: 'success', message: `Added ${p.label} mockup!` });
+                                }
+                              }}
+                              className="group relative aspect-square rounded-lg border border-black/10 dark:border-white/10 p-1 bg-zinc-50 dark:bg-black/60 hover:border-emerald-500 transition-all flex flex-col items-center justify-center"
+                              title={`Add ${p.label}`}
+                            >
+                              <div className="relative w-full h-full">
+                                <Image src={p.path} alt={p.label} fill className="object-contain p-0.5" />
+                              </div>
+                              <span className="text-[8px] font-mono text-zinc-500 truncate w-full text-center mt-0.5">{p.label.split('/')[0]}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] font-mono uppercase text-zinc-500 font-bold block mb-2">Headwear & Caps:</span>
+                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                          {capMockupPresets.map((p, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={() => {
+                                if (!newProductForm.images.includes(p.path)) {
+                                  setNewProductForm({
+                                    ...newProductForm,
+                                    images: [...newProductForm.images, p.path],
+                                  });
+                                  setNotification({ type: 'success', message: `Added ${p.label} mockup!` });
+                                }
+                              }}
+                              className="group relative aspect-square rounded-lg border border-black/10 dark:border-white/10 p-1 bg-zinc-50 dark:bg-black/60 hover:border-emerald-500 transition-all flex flex-col items-center justify-center"
+                              title={`Add ${p.label}`}
+                            >
+                              <div className="relative w-full h-full">
+                                <Image src={p.path} alt={p.label} fill className="object-contain p-0.5" />
+                              </div>
+                              <span className="text-[8px] font-mono text-zinc-500 truncate w-full text-center mt-0.5">{p.label.split(' ')[0]}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Available Sizes Matrix for New Product */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-zinc-50 dark:bg-zinc-900/60 border border-black/10 dark:border-white/10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-950 dark:text-white flex items-center gap-2">
+                    <Sliders className="w-4 h-4 text-emerald-500" />
+                    <span>Available Sizing Matrix ({(newProductForm.sizes || []).length} selected)</span>
+                  </h4>
+                  <span className="text-[10px] text-zinc-500 font-mono">Tap chip to toggle</span>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {STANDARD_SIZES.map((s) => {
+                    const isSelected = (newProductForm.sizes || []).includes(s);
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => {
+                          const current = newProductForm.sizes || [];
+                          const updated = isSelected
+                            ? current.filter((x) => x !== s)
+                            : [...current, s];
+                          setNewProductForm({
+                            ...newProductForm,
+                            sizes: updated.length > 0 ? updated : [s],
+                          });
+                        }}
+                        className={`h-9 px-3.5 rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all shadow-sm ${
+                          isSelected
+                            ? 'bg-black text-white dark:bg-white dark:text-black ring-2 ring-emerald-500/30'
+                            : 'bg-white dark:bg-zinc-800 text-zinc-500 border border-black/10 dark:border-white/10 hover:border-black dark:hover:border-white'
+                        }`}
+                      >
+                        {s} {isSelected ? '✓' : ''}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Add Custom Size */}
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="text"
+                    placeholder="Custom size (e.g. 28, 30, 32, Oversized OS)"
+                    value={customSizeNew}
+                    onChange={(e) => setCustomSizeNew(e.target.value)}
+                    className="flex-1 h-9 px-3 rounded-lg bg-white dark:bg-zinc-800 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!customSizeNew.trim()) return;
+                      const size = customSizeNew.trim().toUpperCase();
+                      if (!(newProductForm.sizes || []).includes(size)) {
+                        setNewProductForm({
+                          ...newProductForm,
+                          sizes: [...(newProductForm.sizes || []), size],
+                        });
+                      }
+                      setCustomSizeNew('');
+                    }}
+                    className="h-9 px-3.5 rounded-lg bg-black text-white dark:bg-white dark:text-black font-mono text-xs font-bold uppercase shrink-0"
+                  >
+                    + Add Size
+                  </button>
+                </div>
               </div>
 
               <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-900/60 border border-black/10 dark:border-white/10 flex items-center justify-between">
@@ -2345,6 +3023,29 @@ export default function AdminPage() {
                     </label>
                   </div>
                 )}
+
+                {/* Or Paste Direct Image URL */}
+                <div className="flex items-center gap-2 pt-1">
+                  <input
+                    type="url"
+                    placeholder="Or paste model photo URL (https://...)"
+                    value={newLookImageUrl}
+                    onChange={(e) => setNewLookImageUrl(e.target.value)}
+                    className="flex-1 h-9 px-3 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!newLookImageUrl.trim()) return;
+                      setNewLook((prev) => ({ ...prev, image: newLookImageUrl.trim() }));
+                      setNewLookImageUrl('');
+                      setNotification({ type: 'success', message: 'Photo URL attached to look!' });
+                    }}
+                    className="h-9 px-3 rounded-lg bg-black text-white dark:bg-white dark:text-black font-mono text-xs font-bold uppercase shrink-0"
+                  >
+                    Set URL
+                  </button>
+                </div>
               </div>
 
               {/* Tagged Product to Shop & Orientation */}
