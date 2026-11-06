@@ -79,15 +79,15 @@ export async function POST(request: Request) {
       stockCount: typeof newProduct.stockCount === 'number' ? newProduct.stockCount : 50,
       images: Array.isArray(newProduct.images) && newProduct.images.length > 0
         ? newProduct.images
-        : ['/products/shirts/IMG_4266.PNG'],
+        : (Array.isArray(newProduct.colors) && newProduct.colors[0]?.images ? newProduct.colors[0].images : []),
       colors: Array.isArray(newProduct.colors) && newProduct.colors.length > 0
         ? newProduct.colors
         : [
             {
-              name: 'Onyx Black',
+              name: 'Default',
               hex: '#111113',
               modelHex: '#18181b',
-              images: newProduct.images || ['/products/shirts/IMG_4266.PNG'],
+              images: newProduct.images || [],
             },
           ],
       sizes: Array.isArray(newProduct.sizes) && newProduct.sizes.length > 0

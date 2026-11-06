@@ -17,10 +17,35 @@ interface ProductsContextType {
 
 const ProductsContext = createContext<ProductsContextType | undefined>(undefined);
 
+const CACHE_KEY = 'xsign_cached_products_v2';
+
 export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Start with bundled data so the page isn't blank, but replace immediately with API data
-  const [products, setProducts] = useState<Product[]>(initialProductsData as Product[]);
+  // Start with localStorage if available to prevent flash of stale data on refresh, else initialProductsData
+  const [products, setProducts] = useState<Product[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        }
+      } catch (_) {}
+    }
+    return initialProductsData as Product[];
+  });
   const [isLoading, setIsLoading] = useState(true);
+
+  // Helper to update both state and localStorage
+  const saveProductsLocally = (newProducts: Product[]) => {
+    setProducts(newProducts);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(newProducts));
+      } catch (_) {}
+    }
+  };
 
   const refreshProducts = useCallback(async () => {
     try {
@@ -36,7 +61,7 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (res.ok) {
         const data = await res.json();
         if (data.success && Array.isArray(data.products) && data.products.length > 0) {
-          setProducts(data.products);
+          saveProductsLocally(data.products);
         }
       }
     } catch (err) {
@@ -60,9 +85,8 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const toggleSoldOut = useCallback(
     async (id: string, isSoldOut: boolean): Promise<boolean> => {
       // Optimistic update
-      setProducts((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, isSoldOut } : p))
-      );
+      const optimistic = products.map((p) => (p.id === id ? { ...p, isSoldOut } : p));
+      saveProductsLocally(optimistic);
 
       try {
         const res = await fetch('/api/admin/products', {
@@ -73,9 +97,8 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.product) {
-            setProducts((prev) =>
-              prev.map((p) => (p.id === id ? data.product : p))
-            );
+            const updated = products.map((p) => (p.id === id ? data.product : p));
+            saveProductsLocally(updated);
             return true;
           }
         }
@@ -88,11 +111,17 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return false;
       }
     },
-    [refreshProducts]
+    [products, refreshProducts]
   );
 
   const updateProduct = useCallback(
     async (id: string, updates: Partial<Product>): Promise<boolean> => {
+      // Optimistic update immediately so UI never stutters or reverts
+      const optimistic = products.map((p) =>
+        p.id === id ? { ...p, ...updates } : p
+      );
+      saveProductsLocally(optimistic);
+
       try {
         const res = await fetch('/api/admin/products', {
           method: 'PATCH',
@@ -102,11 +131,10 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.product) {
-            setProducts((prev) =>
-              prev.map((p) => (p.id === id ? data.product : p))
-            );
-            // Also refresh from server to confirm Supabase persistence
-            setTimeout(() => refreshProducts(), 500);
+            const updated = products.map((p) => (p.id === id ? data.product : p));
+            saveProductsLocally(updated);
+            // Also refresh from server
+            setTimeout(() => refreshProducts(), 600);
             return true;
           }
         }
@@ -116,7 +144,7 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return false;
       }
     },
-    [refreshProducts]
+    [products, refreshProducts]
   );
 
   const addProduct = useCallback(
@@ -130,7 +158,7 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (res.ok) {
           const data = await res.json();
           if (data.success && data.product) {
-            setProducts((prev) => [data.product, ...prev]);
+            saveProductsLocally([data.product, ...products]);
             return true;
           }
         }
@@ -140,7 +168,7 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return false;
       }
     },
-    []
+    [products]
   );
 
   const deleteProduct = useCallback(
@@ -152,7 +180,7 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (res.ok) {
           const data = await res.json();
           if (data.success) {
-            setProducts((prev) => prev.filter((p) => p.id !== id && p.slug !== id));
+            saveProductsLocally(products.filter((p) => p.id !== id && p.slug !== id));
             return true;
           }
         }
@@ -162,7 +190,7 @@ export const ProductsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return false;
       }
     },
-    []
+    [products]
   );
 
   return (

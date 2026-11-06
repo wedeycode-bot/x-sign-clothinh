@@ -1,5 +1,8 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import React from 'react';
 import { HeroSection } from '@/components/home/HeroSection';
 import { LatestDropGrid } from '@/components/home/LatestDropGrid';

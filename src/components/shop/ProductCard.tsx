@@ -15,9 +15,19 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { formatPrice, openQuickView, addToCart } = useCart();
   const { playClick, playSuccess } = useSound();
-  const [selectedColor, setSelectedColor] = useState<ProductColor>(product.colors[0]);
+  const [selectedColor, setSelectedColor] = useState<ProductColor>(product.colors?.[0]);
   const [isHovered, setIsHovered] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+
+  // Sync selectedColor whenever product prop changes
+  React.useEffect(() => {
+    if (product.colors && product.colors.length > 0) {
+      setSelectedColor((prev) => {
+        const match = product.colors.find((c) => c.name === prev?.name);
+        return match || product.colors[0];
+      });
+    }
+  }, [product]);
 
   const isSoldOut = Boolean(product.isSoldOut || (typeof product.stockCount === 'number' && product.stockCount <= 0));
 
@@ -39,11 +49,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     openQuickView(product);
   };
 
-  const activeImages = (selectedColor && selectedColor.images && selectedColor.images.length > 0)
-    ? selectedColor.images
-    : product.images;
+  // Primary cover photo: product.images[0] always reflects admin cover changes
+  const activeImages = (product.images && product.images.length > 0)
+    ? product.images
+    : (selectedColor && selectedColor.images && selectedColor.images.length > 0 ? selectedColor.images : []);
 
-  const currentImage = isHovered && activeImages[1] ? activeImages[1] : activeImages[0];
+  const currentImage = (isHovered && activeImages[1]) ? activeImages[1] : (activeImages[0] || '/campaign/models/IMG_4338.jpg');
   const isCutout = currentImage?.toLowerCase().endsWith('.png');
 
   return (

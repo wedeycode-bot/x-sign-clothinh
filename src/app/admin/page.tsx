@@ -1,5 +1,8 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import React, { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -705,10 +708,12 @@ export default function AdminPage() {
       priceGBP: editingProduct.priceGBP || Math.round(price * 0.061),
       priceEUR: editingProduct.priceEUR || Math.round(price * 0.070),
       isSoldOut,
-      images: Array.isArray(editingProduct.images) && editingProduct.images.length > 0 ? editingProduct.images : ['/products/shirts/IMG_4266.PNG'],
+      images: Array.isArray(editingProduct.images) && editingProduct.images.length > 0
+        ? editingProduct.images
+        : (Array.isArray(editingProduct.colors) && editingProduct.colors[0]?.images ? editingProduct.colors[0].images : []),
       sizes: Array.isArray(editingProduct.sizes) && editingProduct.sizes.length > 0 ? editingProduct.sizes : ['S', 'M', 'L', 'XL'],
       colors: Array.isArray(editingProduct.colors) && editingProduct.colors.length > 0 ? editingProduct.colors : [
-        { name: 'Onyx Black', hex: '#111113', modelHex: '#18181b', images: editingProduct.images || ['/products/shirts/IMG_4266.PNG'] },
+        { name: 'Onyx Black', hex: '#111113', modelHex: '#18181b', images: editingProduct.images || [] },
       ],
       fabricDetails: editingProduct.fabricDetails || {
         composition: '100% Combed Heavy Cotton',
@@ -2030,7 +2035,7 @@ export default function AdminPage() {
         ) : (
           filteredProducts.map((p) => {
             const isSoldOut = Boolean(p.isSoldOut || (typeof p.stockCount === 'number' && p.stockCount <= 0));
-            const coverImg = p.images?.[0] || '/products/shirts/IMG_4266.PNG';
+            const coverImg = p.images?.[0] || p.colors?.[0]?.images?.[0] || '/campaign/models/IMG_4338.jpg';
 
             return (
               <div
@@ -2043,7 +2048,7 @@ export default function AdminPage() {
               >
                 {/* Product Info with Thumbnail */}
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className="relative w-16 h-20 sm:w-20 sm:h-24 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 shrink-0 border border-black/10 dark:border-white/10">
+                  <div className="group relative w-16 h-20 sm:w-20 sm:h-24 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 shrink-0 border border-black/10 dark:border-white/10">
                     <Image
                       src={coverImg}
                       alt={p.title}
@@ -2057,6 +2062,40 @@ export default function AdminPage() {
                         </span>
                       </div>
                     )}
+                    {/* Quick Replace Cover Button */}
+                    <label
+                      title="Tap to change or replace cover photo directly"
+                      className="absolute bottom-1 right-1 w-6 h-6 rounded-md bg-black/85 hover:bg-emerald-600 text-white flex items-center justify-center cursor-pointer shadow-md border border-white/20 transition-all active:scale-90 z-10"
+                    >
+                      <Camera className="w-3 h-3 text-emerald-400" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const files = e.target.files;
+                          if (!files || files.length === 0) return;
+                          setNotification({ type: 'success', message: 'Uploading new cover photo...' });
+                          const urls = await uploadImageFiles(files, 'products');
+                          if (urls.length > 0) {
+                            const newCover = urls[0];
+                            const otherImgs = (p.images || []).filter((im) => im !== newCover).slice(1);
+                            const updatedColors = (p.colors || []).map((col, cIdx) =>
+                              cIdx === 0
+                                ? { ...col, images: [newCover, ...(col.images || []).filter((im) => im !== newCover)] }
+                                : col
+                            );
+                            await updateProduct(p.id, {
+                              ...p,
+                              images: [newCover, ...otherImgs],
+                              colors: updatedColors,
+                            });
+                            setNotification({ type: 'success', message: `Cover photo updated for "${p.title}"!` });
+                          }
+                          e.target.value = '';
+                        }}
+                      />
+                    </label>
                   </div>
 
                   <div className="space-y-1.5 min-w-0">
@@ -2167,24 +2206,36 @@ export default function AdminPage() {
       {editingProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md overflow-y-auto">
           <div className="w-full max-w-2xl bg-white dark:bg-[#0c0d12] border border-black/15 dark:border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl my-8 relative overflow-hidden">
-            <div className="flex items-center justify-between pb-5 mb-6 border-b border-black/10 dark:border-white/10">
-              <div>
+            <div className="flex items-center justify-between pb-5 mb-6 border-b border-black/10 dark:border-white/10 gap-3 flex-wrap">
+              <div className="min-w-0">
                 <span className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase block mb-1">
                   EDIT ATELIER PIECE
                 </span>
-                <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-zinc-950 dark:text-white">
+                <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-tight text-zinc-950 dark:text-white truncate">
                   {editingProduct.title}
                 </h2>
               </div>
-              <button
-                onClick={() => setEditingProduct(null)}
-                className="w-9 h-9 rounded-full border border-black/10 dark:border-white/10 flex items-center justify-center text-zinc-500 hover:text-black dark:hover:text-white transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="submit"
+                  form="edit-product-form"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-mono font-bold text-xs uppercase tracking-wider shadow-lg flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>{isSubmitting ? 'Saving...' : 'Save Changes'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingProduct(null)}
+                  className="w-9 h-9 rounded-full border border-black/10 dark:border-white/10 flex items-center justify-center text-zinc-500 hover:text-black dark:hover:text-white transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
-            <form onSubmit={handleSaveEditProduct} className="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
+            <form id="edit-product-form" onSubmit={handleSaveEditProduct} className="space-y-6 max-h-[75vh] overflow-y-auto pr-2">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-xs uppercase tracking-wider font-mono text-zinc-600 dark:text-zinc-400">
@@ -2335,12 +2386,43 @@ export default function AdminPage() {
                             />
                           </div>
 
-                          {/* Cover Badge / Set Cover Button */}
-                          <div className="absolute top-1.5 left-1.5 z-10">
+                          {/* Cover Badge / Set Cover Button / Replace Button */}
+                          <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1">
                             {isCover ? (
-                              <span className="px-2 py-0.5 rounded-md bg-emerald-500 text-black text-[9px] font-mono font-bold uppercase shadow">
-                                ★ Cover
-                              </span>
+                              <>
+                                <span className="px-1.5 py-0.5 rounded-md bg-emerald-500 text-black text-[9px] font-mono font-bold uppercase shadow">
+                                  ★ Cover
+                                </span>
+                                <label
+                                  className="cursor-pointer px-1.5 py-0.5 rounded-md bg-white text-black hover:bg-zinc-200 text-[9px] font-mono font-bold uppercase shadow transition-colors flex items-center gap-1"
+                                  title="Replace cover photo with a new one"
+                                >
+                                  <Camera className="w-2.5 h-2.5 text-black" />
+                                  <span>Replace</span>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={async (e) => {
+                                      const files = e.target.files;
+                                      if (!files || files.length === 0) return;
+                                      setIsUploadingMockup(true);
+                                      const urls = await uploadImageFiles(files, 'products');
+                                      setIsUploadingMockup(false);
+                                      if (urls.length > 0) {
+                                        const remaining = (editingProduct.images || []).filter((_, i) => i !== idx);
+                                        setEditingProduct({
+                                          ...editingProduct,
+                                          images: [urls[0], ...remaining],
+                                        });
+                                        setNotification({ type: 'success', message: 'Cover photo replaced! Tap "Save Changes" below to publish.' });
+                                      }
+                                      e.target.value = '';
+                                    }}
+                                    disabled={isUploadingMockup}
+                                  />
+                                </label>
+                              </>
                             ) : (
                               <button
                                 type="button"
@@ -2359,8 +2441,22 @@ export default function AdminPage() {
                           <button
                             type="button"
                             onClick={() => {
-                              const newImages = editingProduct.images.filter((_, i) => i !== idx);
-                              setEditingProduct({ ...editingProduct, images: newImages });
+                              const newImages = (editingProduct.images || []).filter((_, i) => i !== idx);
+                              const updatedColors = (editingProduct.colors || []).map((col) => ({
+                                ...col,
+                                images: (col.images || []).filter((ci) => ci !== img),
+                              }));
+                              setEditingProduct({
+                                ...editingProduct,
+                                images: newImages,
+                                colors: updatedColors,
+                              });
+                              setNotification({
+                                type: 'success',
+                                message: isCover
+                                  ? 'Cover photo removed! Tap "Save Changes" below to save.'
+                                  : 'Photo removed! Tap "Save Changes" below to save.',
+                              });
                             }}
                             className="absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-rose-600 hover:bg-rose-700 active:scale-90 text-white flex items-center justify-center shadow-lg transition-all z-10"
                             title="Delete this picture"

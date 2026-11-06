@@ -1,5 +1,8 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -47,15 +50,26 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
     : product.colors[0];
 
   const [selectedColor, setSelectedColor] = useState<ProductColor>(initialColor);
-  const [selectedSize, setSelectedSize] = useState<string>(product.sizes[0]);
+
+  React.useEffect(() => {
+    if (product.colors && product.colors.length > 0) {
+      setSelectedColor((prev) => {
+        const match = product.colors.find((c) => c.name === prev?.name);
+        return match || product.colors[0];
+      });
+    }
+  }, [product]);
+
+  const [selectedSize, setSelectedSize] = useState<string>(product.sizes?.[0] || 'M');
   const [quantity, setQuantity] = useState(1);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
 
-  const activeImages = (selectedColor && selectedColor.images && selectedColor.images.length > 0)
-    ? selectedColor.images
-    : product.images;
+  // Reflect admin photo changes (cover photo and gallery) directly
+  const activeImages = (product.images && product.images.length > 0)
+    ? product.images
+    : (selectedColor && selectedColor.images && selectedColor.images.length > 0 ? selectedColor.images : ['/campaign/models/IMG_4338.jpg']);
 
   const relatedProducts = PRODUCTS.filter((p) => p.id !== product.id).slice(0, 3);
 

@@ -19,7 +19,9 @@ function mapRowToProduct(row: any): Product {
     isSoldOut: Boolean(row.is_sold_out),
     stockCount: typeof row.stock_count === 'number' ? row.stock_count : 50,
     dropName: row.drop_name || 'X-SIGN DROP 01',
-    images: Array.isArray(row.images) && row.images.length > 0 ? row.images : ['/products/shirts/IMG_4266.PNG'],
+    images: Array.isArray(row.images) && row.images.length > 0
+      ? row.images
+      : (Array.isArray(row.colors) && row.colors[0]?.images?.length > 0 ? row.colors[0].images : []),
     colors: Array.isArray(row.colors) ? row.colors : [],
     sizes: Array.isArray(row.sizes) && row.sizes.length > 0 ? row.sizes : ['S', 'M', 'L', 'XL'],
     description: row.description || '',
@@ -178,7 +180,9 @@ export async function addStoredProduct(newProduct: Product): Promise<Product> {
     slug,
     stockCount: typeof newProduct.stockCount === 'number' ? newProduct.stockCount : 50,
     isSoldOut: Boolean(newProduct.isSoldOut),
-    images: Array.isArray(newProduct.images) && newProduct.images.length > 0 ? newProduct.images : ['/products/shirts/IMG_4266.PNG'],
+    images: Array.isArray(newProduct.images) && newProduct.images.length > 0
+      ? newProduct.images
+      : (Array.isArray(newProduct.colors) && newProduct.colors[0]?.images ? newProduct.colors[0].images : []),
     colors: Array.isArray(newProduct.colors) && newProduct.colors.length > 0 ? newProduct.colors : [],
     sizes: Array.isArray(newProduct.sizes) && newProduct.sizes.length > 0 ? newProduct.sizes : ['S', 'M', 'L', 'XL'],
   };

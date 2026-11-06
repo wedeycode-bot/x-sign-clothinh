@@ -1,5 +1,8 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import React, { useState, useMemo, Suspense } from 'react';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
@@ -23,7 +26,9 @@ function ShopContent() {
 
   // Dynamically show only categories that actually have products in the store
   const categories = useMemo(() => {
-    const presentCategories = new Set(products.map((p) => p.category));
+    const presentCategories = new Set<string>(
+      products.map((p) => (p.category === 'shirts' ? 't-shirts' : p.category))
+    );
     const masterOrder: { label: string; value: ProductCategory }[] = [
       { label: 'ALL PIECES', value: 'all' },
       { label: 'SHIRTS', value: 't-shirts' },

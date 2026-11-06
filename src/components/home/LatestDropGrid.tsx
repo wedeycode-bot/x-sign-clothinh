@@ -15,7 +15,9 @@ export const LatestDropGrid: React.FC = () => {
 
   // Dynamically show only categories that have products in the store
   const categories = useMemo(() => {
-    const presentCategories = new Set(products.map((p) => p.category));
+    const presentCategories = new Set<string>(
+      products.map((p) => (p.category === 'shirts' ? 't-shirts' : p.category))
+    );
     const masterOrder: { label: string; value: ProductCategory }[] = [
       { label: 'ALL PIECES', value: 'all' },
       { label: 'SHIRTS', value: 't-shirts' },
