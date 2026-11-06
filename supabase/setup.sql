@@ -188,3 +188,23 @@ INSERT INTO public.products (
   sizes = EXCLUDED.sizes,
   description = EXCLUDED.description;
 
+
+-- ==============================================================================
+-- 7. Site Content & Homepage CMS Table
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.site_settings (
+  id TEXT PRIMARY KEY DEFAULT 'default',
+  content JSONB NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public read site_settings"
+  ON public.site_settings FOR SELECT
+  USING (true);
+
+CREATE POLICY "Allow public/anon update site_settings"
+  ON public.site_settings FOR ALL
+  USING (true)
+  WITH CHECK (true);

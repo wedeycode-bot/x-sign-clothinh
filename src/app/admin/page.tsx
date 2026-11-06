@@ -5,7 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useProducts } from '@/context/ProductsContext';
 import { useCart } from '@/context/CartContext';
+import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { Product, ProductCategory, GarmentType, ADMIN_CATEGORY_OPTIONS, formatCategoryName } from '@/types/product';
+import { SiteSettings } from '@/types/siteSettings';
 import { BRAND_CONFIG } from '@/config/brand';
 import {
   ShieldCheck,
@@ -353,10 +355,32 @@ export default function AdminPage() {
     }
   };
 
-  // Orders & Lookbook Management State
-  const [activeTab, setActiveTab] = useState<'inventory' | 'orders' | 'lookbook'>('inventory');
+  // Primary Section Tabs: Inventory, Customer Orders, Lookbook, Site Content
+  const [activeTab, setActiveTab] = useState<'inventory' | 'orders' | 'lookbook' | 'content'>('inventory');
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+
+  // Site Content & Homepage CMS State
+  const { settings: liveSettings, updateSettings: updateSiteSettings } = useSiteSettings();
+  const [contentForm, setContentForm] = useState<SiteSettings>(liveSettings);
+  const [isSavingContent, setIsSavingContent] = useState(false);
+  const [newTickerText, setNewTickerText] = useState('');
+
+  useEffect(() => {
+    setContentForm(liveSettings);
+  }, [liveSettings]);
+
+  const handleSaveSiteContent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingContent(true);
+    const ok = await updateSiteSettings(contentForm);
+    setIsSavingContent(false);
+    if (ok) {
+      setNotification({ type: 'success', message: 'Homepage & site content updated live!' });
+    } else {
+      setNotification({ type: 'error', message: 'Failed to update site content.' });
+    }
+  };
 
   // Lookbook State
   const [lookbookItems, setLookbookItems] = useState<any[]>([]);
@@ -1098,6 +1122,18 @@ export default function AdminPage() {
           <Camera className="w-4 h-4" />
           <span>Lookbook Models ({lookbookItems.length})</span>
         </button>
+
+        <button
+          onClick={() => setActiveTab('content')}
+          className={`shrink-0 h-11 px-4 sm:px-5 rounded-xl font-sans font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all whitespace-nowrap ${
+            activeTab === 'content'
+              ? 'bg-black text-white dark:bg-white dark:text-black shadow-md'
+              : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
+          }`}
+        >
+          <Sparkles className="w-4 h-4 text-amber-500" />
+          <span>Site Content & Homepage</span>
+        </button>
       </div>
 
       {activeTab === 'orders' ? (
@@ -1364,6 +1400,551 @@ export default function AdminPage() {
             </div>
           )}
         </div>
+      ) : activeTab === 'content' ? (
+        /* SITE CONTENT & HOMEPAGE CMS VIEW */
+        <form onSubmit={handleSaveSiteContent} className="space-y-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-black/10 dark:border-white/10">
+            <div>
+              <h2 className="text-xl font-bold uppercase tracking-tight text-zinc-950 dark:text-white flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-500" />
+                <span>Homepage & Brand Content CMS</span>
+              </h2>
+              <p className="text-xs text-zinc-500 mt-1">
+                Take full control of your homepage runway headlines, running announcements, campaign film, and atelier manifesto.
+              </p>
+            </div>
+            <button
+              type="submit"
+              disabled={isSavingContent}
+              className="h-11 px-6 rounded-xl bg-black text-white dark:bg-white dark:text-black font-sans font-bold text-xs uppercase tracking-widest hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 shadow-lg shrink-0"
+            >
+              {isSavingContent ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Saving Live...</span>
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Save & Publish Changes</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {/* 1. HERO RUNWAY BANNER */}
+          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#0c0d12] border border-black/10 dark:border-white/10 space-y-5 shadow-sm">
+            <div className="flex items-center justify-between border-b border-black/5 dark:border-white/5 pb-3">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-950 dark:text-white flex items-center gap-2">
+                <Eye className="w-4 h-4 text-emerald-500" />
+                <span>01. Main Runway Hero Section</span>
+              </h3>
+              <span className="text-[10px] font-mono text-zinc-500 uppercase">First screen on homepage</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs uppercase font-mono text-zinc-600 dark:text-zinc-400">
+                  Brand Headline
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={contentForm.hero?.title || ''}
+                  onChange={(e) =>
+                    setContentForm({
+                      ...contentForm,
+                      hero: { ...(contentForm.hero || {}), title: e.target.value } as any,
+                    })
+                  }
+                  className="w-full h-11 px-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-sm font-sans text-zinc-950 dark:text-white focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs uppercase font-mono text-zinc-600 dark:text-zinc-400">
+                  Tagline / Subheading
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={contentForm.hero?.tagline || ''}
+                  onChange={(e) =>
+                    setContentForm({
+                      ...contentForm,
+                      hero: { ...(contentForm.hero || {}), tagline: e.target.value } as any,
+                    })
+                  }
+                  className="w-full h-11 px-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-sm font-sans text-zinc-950 dark:text-white focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs uppercase font-mono text-zinc-600 dark:text-zinc-400">
+                Hero Description / Atelier Hook
+              </label>
+              <textarea
+                rows={3}
+                value={contentForm.hero?.description || ''}
+                onChange={(e) =>
+                  setContentForm({
+                    ...contentForm,
+                    hero: { ...(contentForm.hero || {}), description: e.target.value } as any,
+                  })
+                }
+                className="w-full p-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-sans text-zinc-950 dark:text-white focus:outline-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div className="space-y-1.5">
+                <label className="text-xs uppercase font-mono text-zinc-600 dark:text-zinc-400">
+                  Primary Button Text & Destination
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={contentForm.hero?.primaryCtaText || 'SHOP COLLECTION'}
+                    onChange={(e) =>
+                      setContentForm({
+                        ...contentForm,
+                        hero: { ...(contentForm.hero || {}), primaryCtaText: e.target.value } as any,
+                      })
+                    }
+                    className="flex-1 h-10 px-3 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-sans text-zinc-950 dark:text-white"
+                  />
+                  <input
+                    type="text"
+                    value={contentForm.hero?.primaryCtaLink || '/shop'}
+                    onChange={(e) =>
+                      setContentForm({
+                        ...contentForm,
+                        hero: { ...(contentForm.hero || {}), primaryCtaLink: e.target.value } as any,
+                      })
+                    }
+                    className="w-28 h-10 px-3 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs uppercase font-mono text-zinc-600 dark:text-zinc-400">
+                  Secondary Button Text & Destination
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={contentForm.hero?.secondaryCtaText || 'VIEW LOOKBOOK'}
+                    onChange={(e) =>
+                      setContentForm({
+                        ...contentForm,
+                        hero: { ...(contentForm.hero || {}), secondaryCtaText: e.target.value } as any,
+                      })
+                    }
+                    className="flex-1 h-10 px-3 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-sans text-zinc-950 dark:text-white"
+                  />
+                  <input
+                    type="text"
+                    value={contentForm.hero?.secondaryCtaLink || '/lookbook'}
+                    onChange={(e) =>
+                      setContentForm({
+                        ...contentForm,
+                        hero: { ...(contentForm.hero || {}), secondaryCtaLink: e.target.value } as any,
+                      })
+                    }
+                    className="w-28 h-10 px-3 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. MARQUEE RUNNING TICKER ANNOUNCEMENTS */}
+          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#0c0d12] border border-black/10 dark:border-white/10 space-y-5 shadow-sm">
+            <div className="flex items-center justify-between border-b border-black/5 dark:border-white/5 pb-3">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-950 dark:text-white flex items-center gap-2">
+                <Tag className="w-4 h-4 text-emerald-500" />
+                <span>02. Marquee Running Ticker Banner</span>
+              </h3>
+              <span className="text-[10px] font-mono text-zinc-500 uppercase">
+                {(contentForm.marquee?.items || []).length} phrases in rotation
+              </span>
+            </div>
+
+            <p className="text-xs text-zinc-500 font-sans">
+              These phrases scroll continuously across the homepage marquee ticker. Add announcements, drop dates, delivery promises, or atelier slogans.
+            </p>
+
+            <div className="space-y-2">
+              {(contentForm.marquee?.items || []).map((item, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <span className="w-6 text-center font-mono text-xs text-zinc-400 font-bold">{idx + 1}</span>
+                  <input
+                    type="text"
+                    value={item}
+                    onChange={(e) => {
+                      const updated = [...(contentForm.marquee?.items || [])];
+                      updated[idx] = e.target.value;
+                      setContentForm({
+                        ...contentForm,
+                        marquee: { items: updated },
+                      });
+                    }}
+                    className="flex-1 h-10 px-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-sans text-zinc-950 dark:text-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = (contentForm.marquee?.items || []).filter((_, i) => i !== idx);
+                      setContentForm({
+                        ...contentForm,
+                        marquee: { items: updated },
+                      });
+                    }}
+                    className="w-10 h-10 rounded-xl bg-rose-500/10 hover:bg-rose-500 text-rose-500 hover:text-white flex items-center justify-center transition-colors shrink-0"
+                    title="Remove phrase"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <input
+                type="text"
+                placeholder="New ticker phrase (e.g. FLASH SALE • FREE ACCRA DISPATCH)"
+                value={newTickerText}
+                onChange={(e) => setNewTickerText(e.target.value)}
+                className="flex-1 h-11 px-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-sans text-zinc-950 dark:text-white"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  if (!newTickerText.trim()) return;
+                  setContentForm({
+                    ...contentForm,
+                    marquee: {
+                      items: [...(contentForm.marquee?.items || []), newTickerText.trim()],
+                    },
+                  });
+                  setNewTickerText('');
+                }}
+                className="h-11 px-5 rounded-xl bg-black text-white dark:bg-white dark:text-black font-mono text-xs font-bold uppercase shrink-0"
+              >
+                + Add Phrase
+              </button>
+            </div>
+          </div>
+
+          {/* 3. OFFICIAL CAMPAIGN FILM */}
+          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#0c0d12] border border-black/10 dark:border-white/10 space-y-5 shadow-sm">
+            <div className="flex items-center justify-between border-b border-black/5 dark:border-white/5 pb-3">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-950 dark:text-white flex items-center gap-2">
+                <Camera className="w-4 h-4 text-emerald-500" />
+                <span>03. Official Campaign Film Settings</span>
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs uppercase font-mono text-zinc-600 dark:text-zinc-400">
+                  Film Title
+                </label>
+                <input
+                  type="text"
+                  value={contentForm.campaignFilm?.title || ''}
+                  onChange={(e) =>
+                    setContentForm({
+                      ...contentForm,
+                      campaignFilm: { ...(contentForm.campaignFilm || { subtitle: '' }), title: e.target.value },
+                    })
+                  }
+                  className="w-full h-11 px-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-sm font-sans text-zinc-950 dark:text-white"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs uppercase font-mono text-zinc-600 dark:text-zinc-400">
+                  Film Subtitle
+                </label>
+                <input
+                  type="text"
+                  value={contentForm.campaignFilm?.subtitle || ''}
+                  onChange={(e) =>
+                    setContentForm({
+                      ...contentForm,
+                      campaignFilm: { ...(contentForm.campaignFilm || { title: '' }), subtitle: e.target.value },
+                    })
+                  }
+                  className="w-full h-11 px-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-sm font-sans text-zinc-950 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs uppercase font-mono text-zinc-600 dark:text-zinc-400">
+                Optional Direct Video Link (YouTube / MP4 / Cloud Video)
+              </label>
+              <input
+                type="url"
+                placeholder="e.g. https://www.youtube.com/watch?v=... or leave blank for animated model scenes"
+                value={contentForm.campaignFilm?.videoUrl || ''}
+                onChange={(e) =>
+                  setContentForm({
+                    ...contentForm,
+                    campaignFilm: { ...(contentForm.campaignFilm || { title: '', subtitle: '' }), videoUrl: e.target.value },
+                  })
+                }
+                className="w-full h-11 px-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
+              />
+              <span className="text-[10px] text-zinc-500 font-mono block">
+                If left blank, the homepage displays the high-res atelier campaign slideshow with theater mode.
+              </span>
+            </div>
+          </div>
+
+          {/* 4. ATELIER MANIFESTO */}
+          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#0c0d12] border border-black/10 dark:border-white/10 space-y-5 shadow-sm">
+            <div className="flex items-center justify-between border-b border-black/5 dark:border-white/5 pb-3">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-950 dark:text-white flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-emerald-500" />
+                <span>04. Atelier Manifesto & Brand Story</span>
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs uppercase font-mono text-zinc-600 dark:text-zinc-400">
+                  Manifesto Headline
+                </label>
+                <input
+                  type="text"
+                  value={contentForm.manifesto?.heading || ''}
+                  onChange={(e) =>
+                    setContentForm({
+                      ...contentForm,
+                      manifesto: { ...(contentForm.manifesto || {}), heading: e.target.value } as any,
+                    })
+                  }
+                  className="w-full h-11 px-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-sm font-sans text-zinc-950 dark:text-white"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs uppercase font-mono text-zinc-600 dark:text-zinc-400">
+                  Subheading Badge
+                </label>
+                <input
+                  type="text"
+                  value={contentForm.manifesto?.subheading || ''}
+                  onChange={(e) =>
+                    setContentForm({
+                      ...contentForm,
+                      manifesto: { ...(contentForm.manifesto || {}), subheading: e.target.value } as any,
+                    })
+                  }
+                  className="w-full h-11 px-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-sm font-sans text-zinc-950 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs uppercase font-mono text-zinc-600 dark:text-zinc-400">
+                Primary Brand Paragraph
+              </label>
+              <textarea
+                rows={3}
+                value={contentForm.manifesto?.paragraph1 || ''}
+                onChange={(e) =>
+                  setContentForm({
+                    ...contentForm,
+                    manifesto: { ...(contentForm.manifesto || {}), paragraph1: e.target.value } as any,
+                  })
+                }
+                className="w-full p-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-sans text-zinc-950 dark:text-white"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs uppercase font-mono text-zinc-600 dark:text-zinc-400">
+                Secondary Technical Paragraph
+              </label>
+              <textarea
+                rows={2}
+                value={contentForm.manifesto?.paragraph2 || ''}
+                onChange={(e) =>
+                  setContentForm({
+                    ...contentForm,
+                    manifesto: { ...(contentForm.manifesto || {}), paragraph2: e.target.value } as any,
+                  })
+                }
+                className="w-full p-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-sans text-zinc-950 dark:text-white"
+              />
+            </div>
+          </div>
+
+          {/* 5. CONTACT & SOCIALS */}
+          <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#0c0d12] border border-black/10 dark:border-white/10 space-y-5 shadow-sm">
+            <div className="flex items-center justify-between border-b border-black/5 dark:border-white/5 pb-3">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-950 dark:text-white flex items-center gap-2">
+                <Phone className="w-4 h-4 text-emerald-500" />
+                <span>05. Client Care Channels & Social Accounts</span>
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs uppercase font-mono text-zinc-600 dark:text-zinc-400">
+                  WhatsApp Contact Number
+                </label>
+                <input
+                  type="text"
+                  value={contentForm.contact?.whatsappNumber || ''}
+                  onChange={(e) =>
+                    setContentForm({
+                      ...contentForm,
+                      contact: { ...(contentForm.contact || {}), whatsappNumber: e.target.value } as any,
+                    })
+                  }
+                  className="w-full h-11 px-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs uppercase font-mono text-zinc-600 dark:text-zinc-400">
+                  Client Care Email
+                </label>
+                <input
+                  type="email"
+                  value={contentForm.contact?.email || ''}
+                  onChange={(e) =>
+                    setContentForm({
+                      ...contentForm,
+                      contact: { ...(contentForm.contact || {}), email: e.target.value } as any,
+                    })
+                  }
+                  className="w-full h-11 px-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs uppercase font-mono text-zinc-600 dark:text-zinc-400">
+                  Flagship Address
+                </label>
+                <input
+                  type="text"
+                  value={contentForm.contact?.flagshipAddress || ''}
+                  onChange={(e) =>
+                    setContentForm({
+                      ...contentForm,
+                      contact: { ...(contentForm.contact || {}), flagshipAddress: e.target.value } as any,
+                    })
+                  }
+                  className="w-full h-11 px-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-sans text-zinc-950 dark:text-white"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-2">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-mono text-zinc-500">Instagram</label>
+                <input
+                  type="text"
+                  value={contentForm.contact?.instagram || ''}
+                  onChange={(e) =>
+                    setContentForm({
+                      ...contentForm,
+                      contact: { ...(contentForm.contact || {}), instagram: e.target.value } as any,
+                    })
+                  }
+                  className="w-full h-9 px-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-mono text-zinc-500">TikTok</label>
+                <input
+                  type="text"
+                  value={contentForm.contact?.tiktok || ''}
+                  onChange={(e) =>
+                    setContentForm({
+                      ...contentForm,
+                      contact: { ...(contentForm.contact || {}), tiktok: e.target.value } as any,
+                    })
+                  }
+                  className="w-full h-9 px-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-mono text-zinc-500">Twitter / X</label>
+                <input
+                  type="text"
+                  value={contentForm.contact?.twitter || ''}
+                  onChange={(e) =>
+                    setContentForm({
+                      ...contentForm,
+                      contact: { ...(contentForm.contact || {}), twitter: e.target.value } as any,
+                    })
+                  }
+                  className="w-full h-9 px-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-mono text-zinc-500">YouTube</label>
+                <input
+                  type="text"
+                  value={contentForm.contact?.youtube || ''}
+                  onChange={(e) =>
+                    setContentForm({
+                      ...contentForm,
+                      contact: { ...(contentForm.contact || {}), youtube: e.target.value } as any,
+                    })
+                  }
+                  className="w-full h-9 px-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-mono text-zinc-500">Twitch</label>
+                <input
+                  type="text"
+                  value={contentForm.contact?.twitch || ''}
+                  onChange={(e) =>
+                    setContentForm({
+                      ...contentForm,
+                      contact: { ...(contentForm.contact || {}), twitch: e.target.value } as any,
+                    })
+                  }
+                  className="w-full h-9 px-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-black/10 dark:border-white/10 text-xs font-mono text-zinc-950 dark:text-white"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-black/10 dark:border-white/10">
+            <button
+              type="submit"
+              disabled={isSavingContent}
+              className="h-12 px-8 rounded-xl bg-black text-white dark:bg-white dark:text-black font-sans font-bold text-xs uppercase tracking-widest hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all flex items-center gap-2 shadow-xl"
+            >
+              {isSavingContent ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Saving Live to Storefront...</span>
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>Save & Publish All Homepage Changes</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       ) : (
         /* INVENTORY VIEW */
         <>

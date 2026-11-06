@@ -4,9 +4,13 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BRAND_CONFIG } from '@/config/brand';
+import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { ArrowUpRight } from 'lucide-react';
 
 export const CampaignStory: React.FC = () => {
+  const { settings } = useSiteSettings();
+  const manifesto = settings.manifesto || BRAND_CONFIG.manifesto;
+
   return (
     <section className="relative py-24 overflow-hidden bg-white dark:bg-black border-b border-black/10 dark:border-white/10 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
@@ -25,13 +29,10 @@ export const CampaignStory: React.FC = () => {
           <div className="absolute bottom-6 left-6 right-6 sm:bottom-10 sm:left-10 sm:right-10 flex flex-col sm:flex-row sm:items-end justify-between gap-6 pointer-events-none">
             <div className="space-y-2 max-w-xl">
               <span className="px-3 py-1 rounded bg-white text-black font-sans font-bold text-[10px] uppercase tracking-widest inline-block">
-                {BRAND_CONFIG.tagline}
+                {manifesto.subheading || BRAND_CONFIG.tagline}
               </span>
               <h3 className="text-2xl sm:text-4xl lg:text-5xl font-black uppercase text-white font-sans tracking-tight leading-tight">
-                DON’T JUST LOOK DIFFERENT. <br />
-                <span className="text-zinc-300">
-                  MAKE YOUR PRESENCE UNDENIABLE.
-                </span>
+                {manifesto.heading}
               </h3>
             </div>
 
@@ -64,10 +65,10 @@ export const CampaignStory: React.FC = () => {
 
           <div className="lg:col-span-6 space-y-4 text-sm text-zinc-600 dark:text-zinc-400 font-sans leading-relaxed">
             <p>
-              {BRAND_CONFIG.manifesto.paragraph1}
+              {manifesto.paragraph1}
             </p>
             <p>
-              {BRAND_CONFIG.manifesto.paragraph2}
+              {manifesto.paragraph2}
             </p>
           </div>
         </div>

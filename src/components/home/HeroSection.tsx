@@ -5,13 +5,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useSound } from '@/context/SoundContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useSiteSettings } from '@/context/SiteSettingsContext';
 import { BRAND_CONFIG } from '@/config/brand';
 import { ArrowRight, Camera } from 'lucide-react';
 
 export const HeroSection: React.FC = () => {
   const { playClick } = useSound();
   const { theme } = useTheme();
+  const { settings } = useSiteSettings();
 
+  const hero = settings.hero;
   const watermarkLogo = theme === 'light' ? BRAND_CONFIG.logoBlack : BRAND_CONFIG.logoWhite;
 
   return (
@@ -31,34 +34,34 @@ export const HeroSection: React.FC = () => {
         <div className="lg:col-span-5 space-y-6 text-left">
           <div className="space-y-2">
             <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black uppercase tracking-tight text-zinc-950 dark:text-white leading-[0.9] font-display whitespace-nowrap">
-              {BRAND_CONFIG.name}
+              {hero.title || BRAND_CONFIG.name}
             </h1>
             <p className="text-xs sm:text-sm font-mono uppercase tracking-[0.25em] text-zinc-600 dark:text-zinc-300 pt-1">
-              {BRAND_CONFIG.tagline}
+              {hero.tagline || BRAND_CONFIG.tagline}
             </p>
           </div>
 
           <p className="text-sm sm:text-base text-zinc-700 dark:text-zinc-300 font-light leading-relaxed max-w-md">
-            <strong className="text-zinc-950 dark:text-white font-medium">X-SIGN FLEX TEE</strong> — Crafted with heart, worn with purpose. Engineered from heavy fabric of 100% cotton with Glitter Gold, Glitter Silver, Glow in Dark, Reflective & Fine Finished DTF.
+            {hero.description}
           </p>
 
           <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             <Link
-              href="/shop"
+              href={hero.primaryCtaLink || '/shop'}
               onClick={playClick}
               className="py-4 px-8 rounded-full bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 font-bold uppercase tracking-wider text-xs transition-all flex items-center justify-center gap-2 shadow-2xl shadow-black/15 dark:shadow-white/10 group"
             >
-              <span>SHOP COLLECTION</span>
+              <span>{hero.primaryCtaText || 'SHOP COLLECTION'}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
 
             <Link
-              href="/lookbook"
+              href={hero.secondaryCtaLink || '/lookbook'}
               onClick={playClick}
               className="py-4 px-7 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/15 text-zinc-900 dark:text-white font-mono text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2"
             >
               <Camera className="w-4 h-4 text-zinc-600 dark:text-zinc-400" />
-              <span>STREET LOOKBOOK</span>
+              <span>{hero.secondaryCtaText || 'STREET LOOKBOOK'}</span>
             </Link>
           </div>
 

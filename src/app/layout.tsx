@@ -4,6 +4,7 @@ import { ThemeProvider } from '@/context/ThemeContext';
 import { ProductsProvider } from '@/context/ProductsContext';
 import { CartProvider } from '@/context/CartContext';
 import { SoundProvider } from '@/context/SoundContext';
+import { SiteSettingsProvider } from '@/context/SiteSettingsContext';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { CartDrawer } from '@/components/shop/CartDrawer';
@@ -54,25 +55,27 @@ export default function RootLayout({
       <body className="bg-zinc-50 dark:bg-[#08080a] text-zinc-900 dark:text-zinc-100 font-sans antialiased selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black transition-colors duration-200">
         <ThemeProvider>
           <SoundProvider>
-            <ProductsProvider>
-              <CartProvider>
-                {/* Global Navigation */}
-                <Navbar />
+            <SiteSettingsProvider>
+              <ProductsProvider>
+                <CartProvider>
+                  {/* Global Navigation */}
+                  <Navbar />
 
-                {/* Main Application Content */}
-                <main className="relative min-h-screen">
-                  {children}
-                </main>
+                  {/* Main Application Content */}
+                  <main className="relative min-h-screen">
+                    {children}
+                  </main>
 
-                {/* Global Footer */}
-                <Footer />
+                  {/* Global Footer */}
+                  <Footer />
 
-                {/* Interactive Overlays & Modals */}
-                <CartDrawer />
-                <QuickViewModal />
-                <SearchModal />
-              </CartProvider>
-            </ProductsProvider>
+                  {/* Interactive Overlays & Modals */}
+                  <CartDrawer />
+                  <QuickViewModal />
+                  <SearchModal />
+                </CartProvider>
+              </ProductsProvider>
+            </SiteSettingsProvider>
           </SoundProvider>
         </ThemeProvider>
       </body>
